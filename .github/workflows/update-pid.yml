@@ -1,5 +1,11 @@
 name: Aktualizace odjezdů PID
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/export_gtfs.py'
+      - 'scripts/stops.txt'
+      - '.github/workflows/update-pid.yml'
   workflow_dispatch:
   schedule:
     - cron: '17 3 * * *'
