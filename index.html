@@ -10,60 +10,49 @@
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 
-:root {
-  --nastenka-bg-color:#f5f9fc; --nastenka-fg-color1:#172b4d;
-  --container-header-gradient:#0874b8,#00a995;
-  --item-bg-color:#f3f6f8; --item-label-fg-color:#008f82;
-  --header-height:70px;
-}
-*,*::before,*::after {box-sizing:border-box}
-html {font-family:'Open Sans',Arial,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
-html,body {margin:0;padding:0;width:100%;min-width:0;height:100%;background:transparent;color:var(--nastenka-fg-color1)}
-.page {width:100%;height:100%;min-width:0;margin:0;padding:0;container-type:inline-size}
-.panel {width:100%;height:100%;min-height:0;display:flex;flex-direction:column;background:#fff;border:0;border-radius:12px;box-shadow:none;overflow:hidden}
-/* Hlavička má pevnou výšku; její rozměr nezávisí na šířce panelu. */
-.head {height:var(--header-height);min-height:var(--header-height);max-height:var(--header-height);flex:0 0 var(--header-height);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 18px;overflow:hidden;background:linear-gradient(to right,var(--container-header-gradient));color:#fff;border-radius:12px 12px 0 0}
-.identity {display:flex;align-items:center;gap:12px;min-width:0;overflow:hidden}
-.identity>div {min-width:0}
-.bus {width:32px;height:32px;flex:0 0 32px}
-.head h1 {font-size:29px;line-height:1.12;font-weight:800;margin:0;white-space:nowrap}
-.head .subtitle {font-size:16px;line-height:1.2;font-weight:600;opacity:.95;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.clock {flex:0 0 auto;text-align:right;white-space:nowrap}
-.clock-time {font-size:30px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
-.clock-date {font-size:13px;line-height:1.2}
-.body {padding:10px 10px 4px;min-height:0;display:flex;flex-direction:column;flex:1}
-.table-header,.departure {display:grid;grid-template-columns:105px 130px minmax(0,1.3fr) minmax(0,1fr) 95px;gap:12px;align-items:center;min-width:0}
-.table-header>* , .departure>* {min-width:0}
-.table-header {padding:7px 10px;color:#0868ad;font-size:19px;font-weight:700;flex:none}
-.departures-viewport {min-height:0;flex:1;overflow:hidden}
-.departure {padding:7px 10px;margin:0 0 5px;background:var(--item-bg-color);border:1px solid #e9eef2;border-radius:12px;min-height:49px}
-.time {font-size:27px;font-weight:800;font-variant-numeric:tabular-nums}
-.route {display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;column-gap:6px;width:108px;max-width:100%;min-width:0;padding:4px 8px;border-radius:8px;background:#0868ad;color:#fff;font-size:21px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
-.route-number {display:block;min-width:0;text-align:center}
-.route svg,.route-icon {width:20px;height:20px;display:block;justify-self:center;flex:none}
+:root{--nastenka-bg-color:#f5f9fc;--nastenka-fg-color1:#172b4d;--container-header-gradient:#0874b8,#00a995;--item-bg-color:#f3f7fa;--item-label-fg-color:#008f82;--header-height:70px}
+*,*::before,*::after{box-sizing:border-box}
+html{font-family:'Open Sans',Arial,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+html,body{margin:0;padding:0;width:100%;height:100%;min-width:0;background:transparent;color:var(--nastenka-fg-color1)}
+.page{width:100%;height:100%;margin:0;padding:0;container-type:inline-size}
+.panel{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;background:#fff;border-radius:12px;overflow:hidden}
+.head{height:var(--header-height);min-height:var(--header-height);flex:0 0 var(--header-height);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 18px;background:linear-gradient(90deg,var(--container-header-gradient));color:white}
+.identity{display:flex;align-items:center;gap:12px;min-width:0;overflow:hidden}.identity>div{min-width:0}
+.bus{width:32px;height:32px;flex:0 0 32px}
+.head h1{font-size:29px;line-height:1.12;font-weight:800;margin:0;white-space:nowrap}
+.head .subtitle{font-size:15px;line-height:1.2;font-weight:600;opacity:.94;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clock{flex:0 0 auto;text-align:right;white-space:nowrap}.clock-time{font-size:30px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}.clock-date{font-size:13px;line-height:1.2}
+.body{padding:12px 14px 4px;min-height:0;display:flex;flex-direction:column;flex:1}
+.table-header,.departure{display:grid;grid-template-columns:105px 130px minmax(0,1.3fr) minmax(0,1fr) 95px;gap:12px;align-items:center;min-width:0}
+.table-header>*,.departure>*{min-width:0}
+.table-header{padding:8px 12px;color:#0874b8;font-size:16px;font-weight:800;flex:none;border-bottom:1px solid #dce6ed;margin-bottom:8px}
+.departures-viewport{min-height:0;flex:1;overflow:hidden}
+.departure{padding:9px 12px;margin:0 0 7px;background:var(--item-bg-color);border:1px solid #e1eaf0;border-radius:11px;min-height:58px}
+.time{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.route{display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;column-gap:6px;width:108px;max-width:100%;min-width:0;padding:5px 8px;border-radius:8px;background:#0868ad;color:white;font-size:20px;font-weight:800;text-align:center;white-space:nowrap}
+.route-number{display:block;min-width:0;text-align:center}.route svg,.route-icon{width:20px;height:20px;display:block;justify-self:center;flex:none}
 .route.metro-a{background:#00843d}.route.metro-b{background:#f5c518;color:#172b4d}.route.metro-c{background:#d71920}.route.tram{background:#bb2737}.route.train{background:#634b91}.route.ferry{background:#087f91}.route.funicular{background:#6d597a}.route.unknown{background:#536679}
-.destination {font-size:23px;font-weight:700;overflow-wrap:anywhere}
-.stop {color:#008f82;font-size:19px;font-weight:800;overflow-wrap:anywhere}
-.countdown {font-size:19px;font-weight:700;color:#0868ad;white-space:nowrap}
-.footer {display:flex;justify-content:space-between;align-items:center;gap:10px 20px;flex-wrap:wrap;color:#40536a;font-size:13px;padding:10px 10px 12px;flex:none}
-.state {display:inline-flex;align-items:center;gap:8px}.dot {width:9px;height:9px;border-radius:50%;background:#d49b21;display:inline-block}.dot.ok{background:#00a995}.dot.error{background:#d44b4b}
+.destination{font-size:22px;font-weight:700;overflow-wrap:anywhere}.stop{color:#008f82;font-size:18px;font-weight:800;overflow-wrap:anywhere}
+.countdown{font-size:18px;font-weight:800;color:#0868ad;white-space:nowrap}
+.footer{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;color:#627b90;font-size:12px;padding:9px 16px 11px;border-top:1px solid #e4edf2;flex:none;background:#fff}
+.state{display:inline-flex;align-items:center;gap:8px}.dot{width:8px;height:8px;border-radius:50%;background:#d49b21;display:inline-block}.dot.ok{background:#00a995}.dot.error{background:#d44b4b}
 .message{padding:24px;text-align:center;color:#40536a}.updated{font-variant-numeric:tabular-nums}.pagination{font-weight:800;color:#0868ad;white-space:nowrap}
-/* V užších oblastech se zmenší obsah, nikoli výška hlavičky. */
-@container (max-width:800px) {
- .head {padding-inline:10px;gap:6px}.identity{gap:6px}.bus{width:22px;height:22px;flex-basis:22px}
- .head h1{font-size:18px}.head .subtitle{font-size:10px}.clock-time{font-size:19px}.clock-date{font-size:9px}
- .table-header,.departure{grid-template-columns:55px 72px minmax(0,1.3fr) minmax(0,1fr) 52px;gap:5px}
- .table-header{font-size:11px}.time{font-size:17px}
- .route{width:65px;font-size:13px;grid-template-columns:15px minmax(0,1fr);column-gap:2px;padding:4px 3px}
- .route svg,.route-icon{width:15px;height:15px}.destination{font-size:13px}.stop,.countdown{font-size:11px}.footer{font-size:10px}
+@container (max-width:800px){
+.head{padding-inline:10px;gap:6px}.identity{gap:6px}.bus{width:22px;height:22px;flex-basis:22px}
+.head h1{font-size:18px}.head .subtitle{font-size:10px}.clock-time{font-size:19px}.clock-date{font-size:9px}
+.table-header,.departure{grid-template-columns:55px 72px minmax(0,1.3fr) minmax(0,1fr) 52px;gap:5px}
+.table-header{font-size:11px}.time{font-size:17px}.route{width:65px;font-size:13px;grid-template-columns:15px minmax(0,1fr);column-gap:2px;padding:4px 3px}
+.route svg,.route-icon{width:15px;height:15px}.destination{font-size:13px}.stop,.countdown{font-size:11px}.footer{font-size:10px}
+.departure{min-height:45px;padding-block:6px}
 }
-@container (max-width:420px) {
- .head{padding-inline:6px;gap:4px}.identity{gap:4px}.bus{width:18px;height:18px;flex-basis:18px}
- .head h1{font-size:14px}.head .subtitle{font-size:8px}.clock-time{font-size:15px}.clock-date{font-size:8px}
- .table-header,.departure{grid-template-columns:42px 50px minmax(0,1.3fr) minmax(0,1fr) 38px;gap:3px}
- .body{padding:6px 4px 2px}.table-header,.departure{padding-left:4px;padding-right:4px}
- .table-header{font-size:9px}.time{font-size:12px}.route{width:48px;font-size:10px;grid-template-columns:12px minmax(0,1fr)}
- .route svg,.route-icon{width:12px;height:12px}.destination{font-size:11px}.stop,.countdown,.footer{font-size:9px}
+@container (max-width:420px){
+.head{padding-inline:6px;gap:4px}.identity{gap:4px}.bus{width:18px;height:18px;flex-basis:18px}
+.head h1{font-size:14px}.head .subtitle{font-size:8px}.clock-time{font-size:15px}.clock-date{font-size:8px}
+.table-header,.departure{grid-template-columns:42px 50px minmax(0,1.3fr) minmax(0,1fr) 38px;gap:3px}
+.body{padding:6px 4px 2px}.table-header,.departure{padding-left:4px;padding-right:4px}
+.table-header{font-size:9px}.time{font-size:12px}.route{width:48px;font-size:10px;grid-template-columns:12px minmax(0,1fr)}
+.route svg,.route-icon{width:12px;height:12px}.destination{font-size:11px}.stop,.countdown,.footer{font-size:9px}
+.departure{min-height:36px}
 }
 </style>
 </head>
@@ -133,7 +122,7 @@ function routeBadge(d){
 function buildRow(d){const row=document.createElement('div');row.className='departure';const date=new Date(d.scheduled_at);row.append(textNode('span','time',timeFormat.format(date)),routeBadge(d),textNode('span','destination',tidyName(d.destination||'—')),textNode('span','stop',tidyName(d.stop_name||'—')));const countdown=textNode('span','countdown','—');countdown.dataset.departure=String(date.getTime());row.append(countdown);return row}
 function updateCountdowns(){for(const el of document.querySelectorAll('[data-departure]')){const ms=Number(el.dataset.departure)-Date.now();el.textContent=ms<=0?'odjíždí':Math.ceil(ms/60000)+' min'}}
 function render(){const root=$('departures');root.replaceChildren();const current=pages[pageIndex]||[];if(!current.length){const message=initialLoading?'Načítám jízdní řády…':loadFailed?'Odjezdy se nepodařilo načíst.':'V nastaveném časovém okně nejsou plánované odjezdy.';root.append(textNode('div','message',message))}else{for(const d of current)root.append(buildRow(d))}updateCountdowns();$('pagination').textContent=pages.length>1?`Strana ${pageIndex+1}/${pages.length}`:''}
-function repaginate(){const viewport=$('viewport');const height=viewport.clientHeight;if(height<=0)return;const sample=allDepartures.length?buildRow(allDepartures[0]):null;let rowHeight=55;if(sample){sample.style.visibility='hidden';$('departures').append(sample);rowHeight=sample.getBoundingClientRect().height+5;sample.remove()}const perPage=Math.max(1,Math.floor((height+5)/Math.max(1,rowHeight))-1);pages=[];for(let i=0;i<allDepartures.length;i+=perPage)pages.push(allDepartures.slice(i,i+perPage));if(!pages.length)pages=[[]];pageIndex=Math.min(pageIndex,pages.length-1);render()}
+function repaginate(){const viewport=$('viewport');const height=viewport.clientHeight;if(height<=0)return;const sample=allDepartures.length?buildRow(allDepartures[0]):null;let rowHeight=65;if(sample){sample.style.visibility='hidden';$('departures').append(sample);rowHeight=sample.getBoundingClientRect().height+5;sample.remove()}const perPage=Math.max(1,Math.floor(height/Math.max(1,rowHeight)));pages=[];for(let i=0;i<allDepartures.length;i+=perPage)pages.push(allDepartures.slice(i,i+perPage));if(!pages.length)pages=[[]];pageIndex=Math.min(pageIndex,pages.length-1);render()}
 async function load(){if(refreshInProgress)return;refreshInProgress=true;try{const staticBase=query.get('staticData')||'./data/departures.json';const url=new URL(staticBase,location.href);let data;
 if(query.has('staticData')){const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status);data=await response.json()}
 else {
