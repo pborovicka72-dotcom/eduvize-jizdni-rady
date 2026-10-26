@@ -24,7 +24,7 @@ jobs:
       - name: Download PID GTFS
         run: curl --fail --location --retry 3 --connect-timeout 30 --max-time 900 --output /tmp/pid-gtfs.zip https://data.pid.cz/PID_GTFS.zip
       - name: Export departures
-        run: python scripts/export_gtfs.py --stops scripts/stops.txt --zip /tmp/pid-gtfs.zip --output data/departures.json
+        run: python scripts/export_gtfs.py --stops scripts/stops.txt --zip /tmp/pid-gtfs.zip --output data/departures.json --catalog data/stops.json
       - name: Validate data
         run: |
           python - <<'PY'
@@ -42,11 +42,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           cp data/departures.json /tmp/pid-departures.json
+          cp data/stops.json /tmp/pid-stops.json
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
             cp /tmp/pid-departures.json data/departures.json
-            git add data/departures.json
+            cp /tmp/pid-stops.json data/stops.json
+            git add data/departures.json data/stops.json
             if git diff --cached --quiet; then
               echo "Data unchanged."
               break
