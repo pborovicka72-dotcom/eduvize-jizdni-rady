@@ -1,0 +1,1 @@
+# eduvize-jizdni-rady
