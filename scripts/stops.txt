@@ -1,0 +1,4 @@
+# Zastávky pro první omezenou verzi – převzaty z existujícího PID náhledu.
+# Musí odpovídat názvům v oficiálním PID GTFS.
+Pod Žvahovem
+Hlubočepy
