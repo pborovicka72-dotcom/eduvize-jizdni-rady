@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/export_gtfs.py'
       - 'scripts/stops.txt'
+      - 'scripts/school_registry.py'
       - '.github/workflows/update-pid.yml'
   workflow_dispatch:
   schedule:
@@ -27,6 +28,10 @@ jobs:
           python-version: '3.12'
       - name: Test exporter
         run: python -m unittest discover -s scripts -p 'test_*.py' -v
+      - name: Download official MŠMT school registry
+        run: curl --fail --location --retry 3 --connect-timeout 30 --max-time 900 --output /tmp/schools.jsonld https://lkod-ftp.msmt.gov.cz/00022985/250d6b3f-71a2-4441-b8a0-4df141071f13/rssz-cela-cr-2026-09-30.jsonld
+      - name: Generate searchable school catalog
+        run: python scripts/school_registry.py /tmp/schools.jsonld
       - name: Download PID GTFS
         run: curl --fail --location --retry 3 --connect-timeout 30 --max-time 900 --output /tmp/pid-gtfs.zip https://data.pid.cz/PID_GTFS.zip
       - name: Export departures
@@ -49,15 +54,17 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           cp data/departures.json /tmp/pid-departures.json
           cp data/stops.json /tmp/pid-stops.json
+          cp data/schools.json /tmp/pid-schools.json
           cp -a data/shards /tmp/pid-shards
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
             cp /tmp/pid-departures.json data/departures.json
             cp /tmp/pid-stops.json data/stops.json
+            cp /tmp/pid-schools.json data/schools.json
             rm -rf data/shards
             cp -a /tmp/pid-shards data/shards
-            git add data/departures.json data/stops.json data/shards
+            git add data/departures.json data/stops.json data/schools.json data/shards
             if git diff --cached --quiet; then
               echo "Data unchanged."
               break
