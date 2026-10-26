@@ -1,0 +1,63 @@
+name: Aktualizace odjezdů PID
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
+permissions:
+  contents: write
+concurrency:
+  group: pid-public-export
+  cancel-in-progress: false
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test exporter
+        run: python -m unittest discover -s scripts -p 'test_*.py' -v
+      - name: Download PID GTFS
+        run: curl --fail --location --retry 3 --connect-timeout 30 --max-time 900 --output /tmp/pid-gtfs.zip https://data.pid.cz/PID_GTFS.zip
+      - name: Export departures
+        run: python scripts/export_gtfs.py --stops scripts/stops.txt --zip /tmp/pid-gtfs.zip --output data/departures.json
+      - name: Validate data
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('data/departures.json').read_text(encoding='utf-8'))
+          assert data['departures']
+          assert data['source'] == 'pid'
+          print('Valid PID departures:', len(data['departures']))
+          PY
+      - name: Commit refreshed departures
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp data/departures.json /tmp/pid-departures.json
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/pid-departures.json data/departures.json
+            git add data/departures.json
+            if git diff --cached --quiet; then
+              echo "Data unchanged."
+              break
+            fi
+            git commit -m "Update PID departures"
+            if git push origin HEAD:main; then
+              echo "Published PID departures."
+              break
+            fi
+            if [ "$attempt" -eq 5 ]; then
+              exit 1
+            fi
+            sleep "$attempt"
+          done
