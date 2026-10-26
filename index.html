@@ -54,17 +54,42 @@ html,body{margin:0;padding:0;width:100%;height:100%;min-width:0;background:trans
 .route svg,.route-icon{width:12px;height:12px}.destination{font-size:11px}.stop,.countdown,.footer{font-size:9px}
 .departure{min-height:36px}
 }
+
+/* Eduvize: samostatné záhlaví pro běžnou stránku, bez zásahu do NSP widgetu. */
+.site-header{display:none}
+body.web-mode{background:#f5f9fc;min-height:100vh;height:auto}
+.web-mode .site-header{display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:1500px;margin:auto;padding:24px 24px 18px}
+.site-brand{display:flex;align-items:center;gap:14px;min-width:0}
+.site-icon{display:grid;place-items:center;flex:none;width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#0874b8,#00a995);color:#fff;box-shadow:0 8px 20px #008fa62e}
+.site-icon svg{width:30px;height:30px}
+.site-eyebrow{font-size:13px;letter-spacing:.14em;font-weight:800;color:#078b9e;text-transform:uppercase}
+.site-heading{font-size:clamp(25px,2.4vw,38px);font-weight:800;letter-spacing:-.04em;line-height:1.12}
+.site-subtitle{font-size:14px;font-weight:650;color:#64819b;margin-top:4px}
+.site-settings{border:1px solid #c7dce6;border-radius:10px;background:white;padding:10px 16px;text-decoration:none;color:#0868ad;font-size:14px;font-weight:700;white-space:nowrap}
+.web-mode .page{width:min(100%,1500px);height:min(78vh,950px);min-height:430px;margin:0 auto;padding:0 24px 26px}
+.web-mode .panel{border:1px solid #dce6ed;box-shadow:0 8px 28px #143b5510}
+.web-mode .head{border-radius:11px 11px 0 0}
+@media(max-width:600px){.web-mode .site-header{padding:16px 12px;gap:8px}.site-brand{gap:8px}.site-icon{width:40px;height:40px}.site-icon svg{width:24px;height:24px}.site-heading{font-size:22px}.site-eyebrow{font-size:10px}.site-subtitle{font-size:11px}.site-settings{padding:8px;font-size:11px}.web-mode .page{padding:0 10px 15px}}
+/* Jednotný vzhled modrozelené sekce jako u panelů Eduvize. */
+.head{background:linear-gradient(90deg,#0874b8 0%,#00a995 100%);padding-inline:20px}
+.head h1{font-size:26px;letter-spacing:-.02em}.head .subtitle{font-size:13px;opacity:.93}
+.clock-time{font-size:27px}.clock-date{font-size:12px;opacity:.9}
+@container (max-width:800px){.head{padding-inline:10px}.head h1{font-size:18px}.head .subtitle{font-size:10px}.clock-time{font-size:19px}.clock-date{font-size:9px}}
+@container (max-width:420px){.head h1{font-size:14px}.head .subtitle{font-size:8px}.clock-time{font-size:15px}.clock-date{font-size:8px}}
+
 </style>
 </head>
 <body>
+<header class="site-header"><div class="site-brand"><div class="site-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="18" rx="3"/><path d="M5 11h14M9 16h.01M15 16h.01M8 20v2M16 20v2"/></svg></div><div><div class="site-eyebrow">Eduvize · Doprava</div><div class="site-heading">Jízdní řády PID</div><div class="site-subtitle">Přehled odjezdů ze zvolených zastávek</div></div></div><a id="configLink" class="site-settings" href="./config.html">Nastavení</a></header>
 <main class="page"><section class="panel" aria-label="Odjezdy PID">
-<header class="head"><div class="identity"><svg class="bus" viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="12" y="7" width="40" height="45" rx="8" stroke="white" stroke-width="4"/><path d="M17 29h30M22 52v6M42 52v6" stroke="white" stroke-width="4" stroke-linecap="round"/><circle cx="21" cy="41" r="3" fill="white"/><circle cx="43" cy="41" r="3" fill="white"/></svg><div><h1>Odjezdy PID</h1><div class="subtitle" id="station">Načítání zastávek…</div></div></div><div class="clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="date"></div></div></header>
+<header class="head"><div class="identity"><svg class="bus" viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="12" y="7" width="40" height="45" rx="8" stroke="white" stroke-width="4"/><path d="M17 29h30M22 52v6M42 52v6" stroke="white" stroke-width="4" stroke-linecap="round"/><circle cx="21" cy="41" r="3" fill="white"/><circle cx="43" cy="41" r="3" fill="white"/></svg><div><h1>Odjezdy</h1><div class="subtitle" id="station">Načítání zastávek…</div></div></div><div class="clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="date"></div></div></header>
 <div class="body"><div class="table-header"><span>Odjezd</span><span>Linka</span><span>Směr</span><span>Zastávka</span><span>Za</span></div><div class="departures-viewport" id="viewport"><div id="departures" aria-live="off"><div class="message">Načítám jízdní řád…</div></div></div></div>
 <footer class="footer"><span class="state"><span id="dot" class="dot"></span><span id="status">Načítání dat z API</span></span><span>Plánované odjezdy · bez zpoždění</span><span id="pagination" class="pagination"></span><span id="updated" class="updated"></span></footer>
 </section></main>
 <script>
 'use strict';
 const query=new URLSearchParams(location.search);
+if(query.get('viewMode')==='web'){document.body.classList.add('web-mode');const settings=new URL('./config.html',location.href);for(const [key,value] of query){if(key!=='staticData')settings.searchParams.set(key,value)}document.getElementById('configLink').href=settings.href;}
 const names=(query.get('stops')||query.get('name')||'Pod Žvahovem|Hlubočepy').split('|').map(x=>x.trim()).filter(Boolean);
 const stops=[...new Set(names)];
 const minutes=boundedNumber(query.get('minutes'),60,1,720);
