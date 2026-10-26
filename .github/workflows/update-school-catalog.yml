@@ -1,0 +1,31 @@
+name: Update PID school catalog
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 4 * * 1'
+  push:
+    paths:
+      - 'scripts/build_schools.py'
+      - '.github/workflows/update-school-catalog.yml'
+permissions:
+  contents: write
+concurrency:
+  group: pid-school-catalog
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and validate school catalog
+        run: python scripts/build_schools.py
+      - name: Commit updated data
+        run: |
+          git add data/schools.json
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Update official MŠMT school catalog'
+            git push
+          fi
