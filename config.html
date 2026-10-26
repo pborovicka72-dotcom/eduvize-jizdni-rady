@@ -29,10 +29,11 @@
 const $=id=>document.getElementById(id),selected=[],available=[],published=new Set();
 const normalize=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('cs').trim();
 const params=new URLSearchParams(location.search);
+let saved={};try{saved=JSON.parse(localStorage.getItem('eduvize-pid-config')||'{}')}catch{}
 const types=['bus','tram','metro','train','ferry','funicular'];
 const typeBoxes=[...document.querySelectorAll('#transport input')];
 const typeSetting=params.get('types')||(Array.isArray(saved.types)?saved.types.join(','):'');if(typeSetting){const enabled=new Set(typeSetting.split(','));for(const box of typeBoxes)box.checked=enabled.has(box.value)}
-let saved={};try{saved=JSON.parse(localStorage.getItem('eduvize-pid-config')||'{}')}catch{}
+
 for(const id of ['minutes','limit','pageSeconds'])$(id).value=params.get(id)||saved[id]||$(id).value;
 $('viewMode').value=params.get('viewMode')||saved.viewMode||'nsp';
 function message(s,err=false){$('notice').textContent=s;$('notice').classList.toggle('error',err)}
