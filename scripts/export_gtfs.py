@@ -126,9 +126,17 @@ def main():
         with zipfile.ZipFile(path) as archive:
             if args.catalog:
                 all_stops = sorted({row["stop_name"] for row in rows(archive, "stops.txt") if row.get("stop_name")})
+                geo = defaultdict(list)
+                for row in rows(archive, "stops.txt"):
+                    try:
+                        lat, lon = float(row["stop_lat"]), float(row["stop_lon"])
+                        if 48 < lat < 52 and 12 < lon < 19:
+                            geo[row["stop_name"]].append([round(lat, 6), round(lon, 6)])
+                    except (KeyError, ValueError, TypeError):
+                        pass
                 catalog_path = Path(args.catalog)
                 catalog_path.parent.mkdir(parents=True, exist_ok=True)
-                catalog_path.write_text(json.dumps({"stops": all_stops}, ensure_ascii=False), encoding="utf-8")
+                catalog_path.write_text(json.dumps({"stops": all_stops, "coordinates": geo}, ensure_ascii=False), encoding="utf-8")
             if args.list_stops:
                 words = [name.casefold() for name in names]
                 matched = sorted({r['stop_name'] for r in rows(archive, 'stops.txt')
