@@ -122,6 +122,11 @@ def main():
         if not args.zip:
             urllib.request.urlretrieve(FEED, path)
         with zipfile.ZipFile(path) as archive:
+            if args.catalog:
+                all_stops = sorted({row["stop_name"] for row in rows(archive, "stops.txt") if row.get("stop_name")})
+                catalog_path = Path(args.catalog)
+                catalog_path.parent.mkdir(parents=True, exist_ok=True)
+                catalog_path.write_text(json.dumps({"stops": all_stops}, ensure_ascii=False), encoding="utf-8")
             if args.list_stops:
                 words = [name.casefold() for name in names]
                 matched = sorted({r['stop_name'] for r in rows(archive, 'stops.txt')
