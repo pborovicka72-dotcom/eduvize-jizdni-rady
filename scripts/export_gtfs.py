@@ -109,6 +109,7 @@ def main():
     parser.add_argument("--zip", help="Optional local PID GTFS ZIP for offline tests")
     parser.add_argument("--days", type=int, default=2)
     parser.add_argument("--list-stops", action="store_true", help="Print matching stop names from GTFS and exit")
+    parser.add_argument("--catalog", help="Write complete stop-name list to JSON")
     args = parser.parse_args()
     names = [s.strip() for s in Path(args.stops).read_text(encoding="utf-8").splitlines()
              if s.strip() and not s.lstrip().startswith("#")]
