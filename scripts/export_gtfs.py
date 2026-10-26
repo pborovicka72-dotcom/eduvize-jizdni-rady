@@ -3,6 +3,7 @@ import argparse
 import csv
 import io
 import json
+import hashlib
 import urllib.request
 import zipfile
 from collections import defaultdict
@@ -33,10 +34,10 @@ def export(archive, names, output, days=2):
     today = datetime.now(TZ).date()
     dates = [today + timedelta(days=i) for i in range(days + 1)]
     targets = {x.casefold().strip() for x in names}
-    if not targets:
+    if not targets and not output.endswith('/_all.json'):
         raise ValueError('No configured stop names')
     stops = {r["stop_id"]: r["stop_name"] for r in rows(archive, "stops.txt")
-             if r["stop_name"].casefold().strip() in targets}
+             if not targets or r["stop_name"].casefold().strip() in targets}
     matched = {name.casefold().strip() for name in stops.values()}
     missing = sorted(targets - matched)
     if missing:
@@ -110,10 +111,11 @@ def main():
     parser.add_argument("--days", type=int, default=2)
     parser.add_argument("--list-stops", action="store_true", help="Print matching stop names from GTFS and exit")
     parser.add_argument("--catalog", help="Write complete stop-name list to JSON")
+    parser.add_argument("--all-shards", help="Directory for full PID departures, partitioned into 256 files")
     args = parser.parse_args()
     names = [s.strip() for s in Path(args.stops).read_text(encoding="utf-8").splitlines()
              if s.strip() and not s.lstrip().startswith("#")]
-    if not names:
+    if not names and not args.all_shards:
         raise ValueError("No stop names configured")
     if args.days < 1 or args.days > 7:
         raise ValueError("--days must be between 1 and 7")
@@ -133,7 +135,17 @@ def main():
                                   if any(word in r['stop_name'].casefold() for word in words)})
                 print('\n'.join(matched) if matched else 'No matching stops')
                 return
-            count, departures = export(archive, names, args.output, args.days)
+            count, departures = export(archive, [] if args.all_shards else names, str(Path(args.all_shards) / "_all.json") if args.all_shards else args.output, args.days)
+            if args.all_shards:
+                root = Path(args.all_shards)
+                payload = json.loads((root / "_all.json").read_text(encoding="utf-8"))
+                groups = defaultdict(list)
+                for departure in payload["departures"]:
+                    key = hashlib.sha256(departure["stop_name"].encode("utf-8")).hexdigest()[:2]
+                    groups[key].append(departure)
+                for key, items in groups.items():
+                    (root / (key + ".json")).write_text(json.dumps({"generated_at": payload["generated_at"], "source": "pid", "departures": items}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+                (root / "_all.json").unlink()
         print(f"Exported {departures} departures for {count} stops to {args.output}")
 
 
