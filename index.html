@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Eduvize | Odjezdy PID</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --nastenka-bg-color:#f5f9fc; --nastenka-fg-color1:#172b4d;
+  --container-header-gradient:#0874b8,#00a995;
+  --item-bg-color:#f3f6f8; --item-label-fg-color:#008f82;
+  --header-height:70px;
+}
+*,*::before,*::after {box-sizing:border-box}
+html {font-family:'Open Sans',Arial,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+html,body {margin:0;padding:0;width:100%;min-width:0;height:100%;background:transparent;color:var(--nastenka-fg-color1)}
+.page {width:100%;height:100%;min-width:0;margin:0;padding:0;container-type:inline-size}
+.panel {width:100%;height:100%;min-height:0;display:flex;flex-direction:column;background:#fff;border:0;border-radius:12px;box-shadow:none;overflow:hidden}
+/* Hlavička má pevnou výšku; její rozměr nezávisí na šířce panelu. */
+.head {height:var(--header-height);min-height:var(--header-height);max-height:var(--header-height);flex:0 0 var(--header-height);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 18px;overflow:hidden;background:linear-gradient(to right,var(--container-header-gradient));color:#fff;border-radius:12px 12px 0 0}
+.identity {display:flex;align-items:center;gap:12px;min-width:0;overflow:hidden}
+.identity>div {min-width:0}
+.bus {width:32px;height:32px;flex:0 0 32px}
+.head h1 {font-size:29px;line-height:1.12;font-weight:800;margin:0;white-space:nowrap}
+.head .subtitle {font-size:16px;line-height:1.2;font-weight:600;opacity:.95;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clock {flex:0 0 auto;text-align:right;white-space:nowrap}
+.clock-time {font-size:30px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.clock-date {font-size:13px;line-height:1.2}
+.body {padding:10px 10px 4px;min-height:0;display:flex;flex-direction:column;flex:1}
+.table-header,.departure {display:grid;grid-template-columns:105px 130px minmax(0,1.3fr) minmax(0,1fr) 95px;gap:12px;align-items:center;min-width:0}
+.table-header>* , .departure>* {min-width:0}
+.table-header {padding:7px 10px;color:#0868ad;font-size:19px;font-weight:700;flex:none}
+.departures-viewport {min-height:0;flex:1;overflow:hidden}
+.departure {padding:7px 10px;margin:0 0 5px;background:var(--item-bg-color);border:1px solid #e9eef2;border-radius:12px;min-height:49px}
+.time {font-size:27px;font-weight:800;font-variant-numeric:tabular-nums}
+.route {display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;column-gap:6px;width:108px;max-width:100%;min-width:0;padding:4px 8px;border-radius:8px;background:#0868ad;color:#fff;font-size:21px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.route-number {display:block;min-width:0;text-align:center}
+.route svg,.route-icon {width:20px;height:20px;display:block;justify-self:center;flex:none}
+.route.metro-a{background:#00843d}.route.metro-b{background:#f5c518;color:#172b4d}.route.metro-c{background:#d71920}.route.tram{background:#bb2737}.route.train{background:#634b91}.route.ferry{background:#087f91}.route.funicular{background:#6d597a}.route.unknown{background:#536679}
+.destination {font-size:23px;font-weight:700;overflow-wrap:anywhere}
+.stop {color:#008f82;font-size:19px;font-weight:800;overflow-wrap:anywhere}
+.countdown {font-size:19px;font-weight:700;color:#0868ad;white-space:nowrap}
+.footer {display:flex;justify-content:space-between;align-items:center;gap:10px 20px;flex-wrap:wrap;color:#40536a;font-size:13px;padding:10px 10px 12px;flex:none}
+.state {display:inline-flex;align-items:center;gap:8px}.dot {width:9px;height:9px;border-radius:50%;background:#d49b21;display:inline-block}.dot.ok{background:#00a995}.dot.error{background:#d44b4b}
+.message{padding:24px;text-align:center;color:#40536a}.updated{font-variant-numeric:tabular-nums}.pagination{font-weight:800;color:#0868ad;white-space:nowrap}
+/* V užších oblastech se zmenší obsah, nikoli výška hlavičky. */
+@container (max-width:800px) {
+ .head {padding-inline:10px;gap:6px}.identity{gap:6px}.bus{width:22px;height:22px;flex-basis:22px}
+ .head h1{font-size:18px}.head .subtitle{font-size:10px}.clock-time{font-size:19px}.clock-date{font-size:9px}
+ .table-header,.departure{grid-template-columns:55px 72px minmax(0,1.3fr) minmax(0,1fr) 52px;gap:5px}
+ .table-header{font-size:11px}.time{font-size:17px}
+ .route{width:65px;font-size:13px;grid-template-columns:15px minmax(0,1fr);column-gap:2px;padding:4px 3px}
+ .route svg,.route-icon{width:15px;height:15px}.destination{font-size:13px}.stop,.countdown{font-size:11px}.footer{font-size:10px}
+}
+@container (max-width:420px) {
+ .head{padding-inline:6px;gap:4px}.identity{gap:4px}.bus{width:18px;height:18px;flex-basis:18px}
+ .head h1{font-size:14px}.head .subtitle{font-size:8px}.clock-time{font-size:15px}.clock-date{font-size:8px}
+ .table-header,.departure{grid-template-columns:42px 50px minmax(0,1.3fr) minmax(0,1fr) 38px;gap:3px}
+ .body{padding:6px 4px 2px}.table-header,.departure{padding-left:4px;padding-right:4px}
+ .table-header{font-size:9px}.time{font-size:12px}.route{width:48px;font-size:10px;grid-template-columns:12px minmax(0,1fr)}
+ .route svg,.route-icon{width:12px;height:12px}.destination{font-size:11px}.stop,.countdown,.footer{font-size:9px}
+}
+</style>
+</head>
+<body>
+<main class="page"><section class="panel" aria-label="Odjezdy PID">
+<header class="head"><div class="identity"><svg class="bus" viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="12" y="7" width="40" height="45" rx="8" stroke="white" stroke-width="4"/><path d="M17 29h30M22 52v6M42 52v6" stroke="white" stroke-width="4" stroke-linecap="round"/><circle cx="21" cy="41" r="3" fill="white"/><circle cx="43" cy="41" r="3" fill="white"/></svg><div><h1>Odjezdy PID</h1><div class="subtitle" id="station">Načítání zastávek…</div></div></div><div class="clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="date"></div></div></header>
+<div class="body"><div class="table-header"><span>Odjezd</span><span>Linka</span><span>Směr</span><span>Zastávka</span><span>Za</span></div><div class="departures-viewport" id="viewport"><div id="departures" aria-live="off"><div class="message">Načítám jízdní řád…</div></div></div></div>
+<footer class="footer"><span class="state"><span id="dot" class="dot"></span><span id="status">Načítání dat z API</span></span><span>Plánované odjezdy · bez zpoždění</span><span id="pagination" class="pagination"></span><span id="updated" class="updated"></span></footer>
+</section></main>
+<script>
+'use strict';
+const query=new URLSearchParams(location.search);
+const names=(query.get('stops')||query.get('name')||'Pod Žvahovem|Hlubočepy').split('|').map(x=>x.trim()).filter(Boolean);
+const stops=[...new Set(names)];
+const minutes=boundedNumber(query.get('minutes'),60,1,720);
+const limit=boundedNumber(query.get('limit'),25,1,200);
+const pageSeconds=boundedNumber(query.get('pageSeconds'),10,3,120);
+const source=query.get('source')||'pid';
+const zone='Europe/Prague';
+const timeFormat=new Intl.DateTimeFormat('cs-CZ',{timeZone:zone,hour:'2-digit',minute:'2-digit'});
+const dateFormat=new Intl.DateTimeFormat('cs-CZ',{timeZone:zone,weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const $=id=>document.getElementById(id);
+let allDepartures=[],pages=[[]],pageIndex=0,refreshInProgress=false,initialLoading=true,loadFailed=false;
+function boundedNumber(value,fallback,min,max){if(value===null||value==='')return fallback;const n=Number(value);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.floor(n))):fallback}
+function stopWord(n){return n===1?'zastávka':n>=2&&n<=4?'zastávky':'zastávek'}
+function tidyName(value){return String(value).replace(/,\s*/g,', ').replace(/žel\.\s*st\./gi,'žel. st.').replace(/\s+/g,' ').trim()}
+function updateClock(){const now=new Date();$('clock').textContent=timeFormat.format(now);$('date').textContent=dateFormat.format(now)}
+function textNode(tag,cls,value){const el=document.createElement(tag);el.className=cls;el.textContent=value;return el}
+function setStatus(value,kind){$('status').textContent=value;$('dot').className='dot '+(kind||'')}
+const SVG_NS='http://www.w3.org/2000/svg';
+function makeIcon(kind){
+  const svg=document.createElementNS(SVG_NS,'svg');
+  svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('width','20');svg.setAttribute('height','20');
+  svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','1.8');
+  svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
+  svg.setAttribute('aria-hidden','true');svg.classList.add('route-icon');
+  const paths={
+    bus:'M5 17V6a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2ZM5 11h14M8 15h.01M16 15h.01M8 19v2M16 19v2',
+    tram:'M5 17V7a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2ZM5 11h14M8 15h.01M16 15h.01M8 19l-2 2M16 19l2 2M9 2h6',
+    train:'M5 16V6a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3ZM5 11h14M8 15h.01M16 15h.01M8 19l-2 3M16 19l2 3',
+    metro:'M5 16V6a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3ZM5 11h14M8 15h.01M16 15h.01M8 19l-2 3M16 19l2 3',
+    ferry:'M3 17l3 3 6-2 6 2 3-3-3-7H6l-3 7ZM12 3v7M8 6h8M2 22c2-1 4-1 6 0 2-1 4-1 6 0 2-1 4-1 6 0',
+    funicular:'M5 17 7 8h10l2 9-2 2H7l-2-2ZM7 13h10M8 19l-2 3M16 19l2 3M12 8V2',
+    other:'M12 3v18M3 12h18'
+  };
+  const path=document.createElementNS(SVG_NS,'path');path.setAttribute('d',paths[kind]||paths.other);svg.append(path);
+  return svg;
+}
+function routeBadge(d){
+  const line=String(d.line||'—').trim();
+  const type=Number(d.route_type);
+  const badge=document.createElement('span');badge.className='route';
+  let kind='other',label='spoj';
+  if(type===1){kind='metro';label='metro';badge.classList.add(['A','B','C'].includes(line.toUpperCase())?'metro-'+line.toLowerCase():'unknown');}
+  else if(type===0||type===900){kind='tram';label='tramvaj';badge.classList.add('tram');}
+  else if(type===2||type>=100&&type<200){kind='train';label='vlak';badge.classList.add('train');}
+  else if(type===3||type>=700&&type<800){kind='bus';label='autobus';}
+  else if(type===4||type>=1000&&type<1100){kind='ferry';label='přívoz';badge.classList.add('ferry');}
+  else if(type===7||type>=1300&&type<1400){kind='funicular';label='lanovka';badge.classList.add('funicular');}
+  else{badge.classList.add('unknown');}
+  badge.append(makeIcon(kind),textNode('span','route-number',line));
+  badge.setAttribute('aria-label',label+' '+line);
+  return badge;
+}
+function buildRow(d){const row=document.createElement('div');row.className='departure';const date=new Date(d.scheduled_at);row.append(textNode('span','time',timeFormat.format(date)),routeBadge(d),textNode('span','destination',tidyName(d.destination||'—')),textNode('span','stop',tidyName(d.stop_name||'—')));const countdown=textNode('span','countdown','—');countdown.dataset.departure=String(date.getTime());row.append(countdown);return row}
+function updateCountdowns(){for(const el of document.querySelectorAll('[data-departure]')){const ms=Number(el.dataset.departure)-Date.now();el.textContent=ms<=0?'odjíždí':Math.ceil(ms/60000)+' min'}}
+function render(){const root=$('departures');root.replaceChildren();const current=pages[pageIndex]||[];if(!current.length){const message=initialLoading?'Načítám jízdní řády…':loadFailed?'Odjezdy se nepodařilo načíst.':'V nastaveném časovém okně nejsou plánované odjezdy.';root.append(textNode('div','message',message))}else{for(const d of current)root.append(buildRow(d))}updateCountdowns();$('pagination').textContent=pages.length>1?`Strana ${pageIndex+1}/${pages.length}`:''}
+function repaginate(){const viewport=$('viewport');const height=viewport.clientHeight;if(height<=0)return;const sample=allDepartures.length?buildRow(allDepartures[0]):null;let rowHeight=55;if(sample){sample.style.visibility='hidden';$('departures').append(sample);rowHeight=sample.getBoundingClientRect().height+5;sample.remove()}const perPage=Math.max(1,Math.floor((height+5)/Math.max(1,rowHeight))-1);pages=[];for(let i=0;i<allDepartures.length;i+=perPage)pages.push(allDepartures.slice(i,i+perPage));if(!pages.length)pages=[[]];pageIndex=Math.min(pageIndex,pages.length-1);render()}
+async function load(){if(refreshInProgress)return;refreshInProgress=true;try{const staticBase=query.get('staticData')||'./data/departures.json';const url=new URL(staticBase,location.href);const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status);const data=await response.json();if(!Array.isArray(data.departures))throw new Error('Neplatná data PID');const generated=Date.parse(data.generated_at||'');const stale=!Number.isFinite(generated)||Date.now()-generated>36*3600000;const available=new Set(data.departures.map(d=>d.stop_name));const missing=stops.filter(name=>!available.has(name));const valid=[{value:data.departures.filter(d=>stops.includes(d.stop_name))}];const now=Date.now(),until=now+minutes*60000;const merged=valid.flatMap(r=>r.value).filter(d=>{const t=Date.parse(d.scheduled_at);return Number.isFinite(t)&&t>=now&&t<=until});const seen=new Set();allDepartures=merged.filter(d=>{const key=[d.stop_id||d.stop_name,d.trip_id||'',d.line,d.destination,d.scheduled_at].join('|');if(seen.has(key))return false;seen.add(key);return true}).sort((a,b)=>Date.parse(a.scheduled_at)-Date.parse(b.scheduled_at)).slice(0,limit);pageIndex=0;initialLoading=false;loadFailed=false;repaginate();setStatus(missing.length?'V exportu chybí: '+missing.join(', '):stale?'Pozor: jízdní řády nejsou aktuálně obnovené':'Plánované odjezdy PID',missing.length||stale?'error':'ok');$('updated').textContent=Number.isFinite(generated)?'Data PID: '+new Intl.DateTimeFormat('cs-CZ',{timeZone:zone,day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(generated)):'Čas aktualizace není dostupný';if(missing.length)console.warn('Zastávky nejsou v exportu',missing)}catch(err){initialLoading=false;loadFailed=true;setStatus('API momentálně není dostupné','error');if(!allDepartures.length)repaginate();console.error('Eduvize PID:',err)}finally{refreshInProgress=false}}
+$('station').textContent=`${stops.length} ${stopWord(stops.length)} · následujících ${minutes} min`;
+updateClock();load();setInterval(()=>{updateClock();updateCountdowns()},10000);setInterval(load,60000);setInterval(()=>{if(pages.length>1){pageIndex=(pageIndex+1)%pages.length;render()}},pageSeconds*1000);new ResizeObserver(()=>repaginate()).observe($('viewport'));
+</script>
+</body>
+</html>
