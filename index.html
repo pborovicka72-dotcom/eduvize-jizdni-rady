@@ -115,6 +115,17 @@ html.kiosk-output .page>.panel>.head{
   box-sizing:border-box!important;
   background-clip:padding-box!important;
 }
+</style><style>
+/* Keep the departures header below the top edge, aligned with kiosk menu tiles.
+   The inset belongs to the app viewport, not to the header itself. */
+html.kiosk-output .page{
+  padding:clamp(6px,.9vmin,14px) 0 0!important;
+  box-sizing:border-box!important;
+}
+html.kiosk-output .page>.panel{
+  height:100%!important;
+  min-height:0!important;
+}
 </style></head>
 <body>
 <header class="site-header"><div class="site-brand"><div class="site-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="18" rx="3"/><path d="M5 11h14M9 16h.01M15 16h.01M8 20v2M16 20v2"/></svg></div><div><div class="site-eyebrow">Eduvize · Doprava</div><div class="site-heading">Jízdní řády PID</div><div class="site-subtitle">Přehled odjezdů ze zvolených zastávek</div></div></div></header>
