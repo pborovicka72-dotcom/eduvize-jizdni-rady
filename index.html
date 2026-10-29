@@ -97,7 +97,7 @@ body.show-all,body.show-all .page,body.show-all .panel{height:auto;min-height:0}
 html.kiosk-header-synced .head{height:var(--kiosk-header-height)!important;min-height:var(--kiosk-header-height)!important;flex:0 0 var(--kiosk-header-height)!important;border-radius:12px!important}
 </style>
 <style>html.kiosk-output{height:100%}html.kiosk-output body{min-height:100%;margin:0}html.kiosk-output .site-header{display:none!important}html.kiosk-output body{min-height:100dvh;overflow-x:hidden}html.kiosk-output main,html.kiosk-output .shell,html.kiosk-output .container{max-width:none!important;width:100%!important}html.kiosk-output button,html.kiosk-output input,html.kiosk-output select{touch-action:manipulation;min-height:44px}</style><script>if(new URLSearchParams(location.search).get('viewMode')==='kiosk'||new URLSearchParams(location.search).get('output')==='kiosk')document.documentElement.classList.add('kiosk-output');window.addEventListener('message',event=>{
- if(event.origin!=='https://pborovicka72-dotcom.github.io')return;
+ if(!['https://pborovicka72-dotcom.github.io','https://eduvize-kiosek.onrender.com'].includes(event.origin))return;
  if(!event.data||event.data.type!=='eduvize-kiosk-layout')return;
  const height=Number(event.data.headerHeight);
  if(!Number.isFinite(height)||height<60||height>500)return;
