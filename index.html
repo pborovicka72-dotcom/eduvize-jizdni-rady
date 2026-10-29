@@ -138,6 +138,31 @@ html.kiosk-output .page>.panel>.head{
   overflow:hidden!important;
   isolation:isolate!important;
 }
+</style><style>
+/* Render the selected-tile frame as a separate overlay so decorative header
+   gradients and pseudo-elements cannot cover the rounded top corners. */
+html.kiosk-output .page>.panel>.head{
+  border:0!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  position:relative!important;
+  isolation:isolate!important;
+  box-shadow:0 6px 18px #006b7740!important;
+}
+html.kiosk-output .page>.panel>.head::marker{content:none}
+html.kiosk-output .page>.panel>.head::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  width:auto!important;
+  height:auto!important;
+  border:2px solid #00a995!important;
+  border-radius:12px!important;
+  box-shadow:inset 0 0 0 1px #00a995!important;
+  background:none!important;
+  pointer-events:none!important;
+  z-index:20!important;
+}
 </style></head>
 <body>
 <header class="site-header"><div class="site-brand"><div class="site-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="18" rx="3"/><path d="M5 11h14M9 16h.01M15 16h.01M8 20v2M16 20v2"/></svg></div><div><div class="site-eyebrow">Eduvize · Doprava</div><div class="site-heading">Jízdní řády PID</div><div class="site-subtitle">Přehled odjezdů ze zvolených zastávek</div></div></div></header>
