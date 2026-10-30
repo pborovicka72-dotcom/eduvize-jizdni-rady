@@ -24,10 +24,10 @@ button:focus-visible{outline:3px solid #008f91;outline-offset:3px}.stop-chip but
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.css?v=10">
 <style>
 .output-modules{margin-top:20px;padding:22px;background:#fff;border-radius:20px;box-shadow:0 8px 28px #143b5510;min-width:0}
-.output-modules h2{margin:0 0 18px;font-size:22px;letter-spacing:-.02em}.output-mode-row{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:18px}.output-mode-row label{display:grid;gap:6px;font-size:13px;font-weight:650;color:#35536a;min-width:220px}.output-mode-row select{width:100%;height:36px;padding:7px 12px;border:1px solid #bed5dd;border-radius:10px;background:#fff;color:#142c46;font:inherit}
+.output-modules h2{margin:0 0 18px;font-size:22px;letter-spacing:-.02em}
 .output-modules .config-actions{margin-top:22px}.output-modules .config-help{margin-top:12px}.output-modules [hidden]{display:none!important}#modulePicker{margin-top:18px}#outputLink{width:100%;margin-top:12px;padding:10px;border:1px solid #bed5dd;border-radius:10px;color:#142c46;font:inherit;min-height:78px;overflow-wrap:anywhere}
-.web-preview{margin-top:18px}.web-preview h3{font-size:18px;margin:0 0 12px}.web-preview iframe{display:block;width:100%;height:clamp(420px,65vh,760px);border:1px solid #bed5dd;border-radius:12px;background:#f5f9fc}
-@media(max-width:470px){.output-modules{padding:16px}.output-mode-row label{min-width:0;width:100%}}
+
+@media(max-width:470px){.output-modules{padding:16px}}
 </style>
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.css?v=1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.js?v=2"></script></head><body>
 <main class="config-wrap"><header class="header"><div class="brandmark" data-edu-app-icon="transport"></div><div><div class="eyebrow">Eduvize · Doprava</div><h1>Jízdní řády PID</h1><div class="subtitle">Nastavení zobrazovaných odjezdů</div></div></header>
@@ -44,14 +44,10 @@ button:focus-visible{outline:3px solid #008f91;outline-offset:3px}.stop-chip but
 <label>Přepínání stránek (sekund)<input id="pageSeconds" type="number" min="3" max="120" value="10"></label>
 <div class="full"><p class="config-intro">Druhy dopravy</p><div id="transport" class="transport" style="margin-top:10px"><label class="check"><input type="checkbox" value="bus" checked> Autobusy</label><label class="check"><input type="checkbox" value="tram" checked> Tramvaje</label><label class="check"><input type="checkbox" value="metro" checked> Metro</label><label class="check"><input type="checkbox" value="train" checked> Vlaky</label><label class="check"><input type="checkbox" value="ferry" checked> Přívozy</label><label class="check"><input type="checkbox" value="funicular" checked> Lanovka</label></div></div></form>
 <section class="output-modules" aria-labelledby="outputHeading">
-<h2 id="outputHeading">Výstup a šablona Newline</h2>
-<div class="output-mode-row">
-<label>Typ výstupu<select id="outputType"><option value="nsp">Newline Signage Pro</option><option value="web">Běžná stránka</option></select></label>
-<label id="webPagingField" hidden>Zobrazení běžné stránky<select id="webPaging"><option value="web-all">Vše pod sebou</option><option value="web-pages">Automatické stránkování</option></select></label>
-</div>
+<h2 id="outputHeading">Šablona a segment Newline</h2>
 <p id="previewHelp" class="config-help" role="status">Pro náhled vyberte alespoň jednu zastávku.</p>
 <div id="modulePicker"></div>
-<section id="webPreview" class="web-preview" aria-labelledby="webPreviewHeading" hidden><h3 id="webPreviewHeading">Náhled běžné stránky</h3><iframe id="webPreviewFrame" title="Náhled běžné stránky"></iframe></section>
+
 <div class="config-actions"><button class="action" type="submit" form="form">Použít a otevřít výstup</button><button class="action secondary" type="button" id="copy">Kopírovat odkaz</button><button class="action secondary" type="button" id="saveSettings">Uložit nastavení</button></div>
 <p id="notice" class="config-help" role="status"></p>
 <textarea id="outputLink" readonly hidden aria-label="Odkaz na výstup"></textarea>
@@ -72,10 +68,7 @@ const typeBoxes=[...document.querySelectorAll('#transport input')];
 const typeSetting=params.get('types');if(typeSetting!==null){const enabled=new Set(typeSetting.split(','));for(const box of typeBoxes)box.checked=enabled.has(box.value)}else{const enabled=new Set(Array.isArray(saved.types)?saved.types:types);for(const box of typeBoxes)box.checked=enabled.has(box.value)}
 
 for(const id of ['minutes','limit','pageSeconds','nearbyKm']){const el=$(id),fallback=el.value;el.required=true;el.value=params.get(id)??saved[id]??fallback;if(!el.checkValidity())el.value=fallback;}
-const requestedMode=params.get('viewMode')||saved.viewMode||'nsp';
-$('outputType').value=['web','web-all','web-pages'].includes(requestedMode)?'web':'nsp';
-$('webPaging').value=requestedMode==='web-all'?'web-all':'web-pages';
-function viewMode(){return $('outputType').value==='web'?$('webPaging').value:'nsp'}
+function viewMode(){return 'nsp'}
 const segmentDefaults={orientation:'landscape',style:1,block:1};
 let segmentState={orientation:params.get('segment_orientation')||saved.segment?.orientation||segmentDefaults.orientation,style:Number(params.get('segment_style')||saved.segment?.style||1),block:Number(params.get('segment_block')||saved.segment?.block||1)};
 const moduleHost=$('modulePicker');let modulePicker=null,moduleTimer=0;
@@ -124,18 +117,8 @@ $('copy').onclick=async()=>{try{const url=outputUrl();const stored=save();$('out
 function scheduleModulePreview(){clearTimeout(moduleTimer);moduleTimer=setTimeout(renderModulePreview,200)}
 function previewSettingsValid(){return selected.length>0&&typeBoxes.some(box=>box.checked)&&['minutes','limit','pageSeconds'].every(key=>$(key).checkValidity())}
 function renderModulePreview(){
-const web=$('outputType').value==='web',valid=previewSettingsValid();
-$('webPagingField').hidden=!web;
-moduleHost.hidden=web;
-$('webPreview').hidden=!web||!valid;
+const valid=previewSettingsValid();
 $('previewHelp').textContent=valid?'Náhled odpovídá vybraným zastávkám a nastavení odjezdů.':'Pro náhled vyberte alespoň jednu zastávku, druh dopravy a platné číselné nastavení.';
-if(web){
-const frame=$('webPreviewFrame');
-if(valid){const url=new URL(outputUrl());url.searchParams.set('preview','1');if(frame.src!==url.href)frame.src=url.href}
-else frame.removeAttribute('src');
-return;
-}
-$('webPreviewFrame').removeAttribute('src');
 if(!window.EduvizeNSPPicker||!window.EduvizeNSPLayouts){$('previewHelp').textContent='Výběr modulů se nepodařilo načíst. Obnovte stránku; ostatní nastavení zůstávají dostupná.';return}
 if(!modulePicker){
 modulePicker=window.EduvizeNSPPicker.mount(moduleHost,{initial:segmentState,interactivePreview:true,previewUrl:state=>{
@@ -151,7 +134,6 @@ const valid=previewSettingsValid();
 moduleHost.querySelector('#ev-preview-wrap').hidden=!valid;
 moduleHost.querySelector('h3').hidden=!valid;
 }
-$('outputType').addEventListener('change',renderModulePreview);$('webPaging').addEventListener('change',renderModulePreview);
 for(const id of ['minutes','limit','pageSeconds'])$(id).addEventListener('input',scheduleModulePreview);
 for(const box of typeBoxes)box.addEventListener('change',scheduleModulePreview);
 $('saveSettings').onclick=()=>{try{outputUrl();message(save()?'Nastavení bylo uloženo v tomto prohlížeči.':'Prohlížeč nepovolil uložení. Použijte odkaz na výstup.',false)}catch(err){message(err.message,true)}};
