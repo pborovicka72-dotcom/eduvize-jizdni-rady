@@ -1,122 +1,20 @@
-<!doctype html>
-<html lang="cs">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light">
-<title>Eduvize | Odjezdy PID</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-
-:root{--nastenka-bg-color:#f5f9fc;--nastenka-fg-color1:#172b4d;--container-header-gradient:#0874b8,#00a995;--item-bg-color:#f3f7fa;--item-label-fg-color:#008f82}
-*,*::before,*::after{box-sizing:border-box}
-html{font-family:'Open Sans',Arial,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
-html,body{margin:0;padding:0;width:100%;height:100%;min-width:0;background:transparent;color:var(--nastenka-fg-color1)}
-.page{width:100%;height:100%;margin:0;padding:0;container-type:inline-size}
-.panel{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;background:#fff;border-radius:12px;overflow:hidden}
-.head{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,var(--container-header-gradient));color:white}
-.identity{display:flex;align-items:center;gap:12px;min-width:0;overflow:hidden}.identity>div{min-width:0}
-.head h1{line-height:1.12;font-weight:800;margin:0;white-space:nowrap}
-.head .subtitle{line-height:1.2;font-weight:600;opacity:.94;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.clock{flex:0 0 auto;text-align:right;white-space:nowrap}.clock-time{font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}.clock-date{line-height:1.2}
-.body{padding:12px 14px 4px;min-height:0;display:flex;flex-direction:column;flex:1}
-.table-header,.departure{display:grid;grid-template-columns:105px 130px minmax(0,1.3fr) minmax(0,1fr) 95px;gap:12px;align-items:center;min-width:0}
-.table-header>*,.departure>*{min-width:0}
-.table-header{padding:8px 12px;color:#0874b8;font-size:16px;font-weight:800;flex:none;border-bottom:1px solid #dce6ed;margin-bottom:8px}
-.departures-viewport{min-height:0;flex:1;overflow:hidden}
-.departure{padding:9px 12px;margin:0 0 7px;background:var(--item-bg-color);border:1px solid #e1eaf0;border-radius:11px;min-height:58px}
-.time{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
-.route{display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;column-gap:6px;width:108px;max-width:100%;min-width:0;padding:5px 8px;border-radius:8px;background:#0868ad;color:white;font-size:20px;font-weight:800;text-align:center;white-space:nowrap}
-.route-number{display:block;min-width:0;text-align:center}.route svg,.route-icon{width:20px;height:20px;display:block;justify-self:center;flex:none}
-.route.metro-a{background:#00843d}.route.metro-b{background:#f5c518;color:#172b4d}.route.metro-c{background:#d71920}.route.tram{background:#bb2737}.route.train{background:#634b91}.route.ferry{background:#087f91}.route.funicular{background:#6d597a}.route.unknown{background:#536679}
-.destination{font-size:22px;font-weight:700;overflow-wrap:anywhere}.stop{color:#008f82;font-size:18px;font-weight:800;overflow-wrap:anywhere}
-.countdown{font-size:18px;font-weight:800;color:#0868ad;white-space:nowrap}
-.footer{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;color:#627b90;font-size:12px;padding:9px 16px 11px;border-top:1px solid #e4edf2;flex:none;background:#fff}
-.state{display:inline-flex;align-items:center;gap:8px}.dot{width:8px;height:8px;border-radius:50%;background:#d49b21;display:inline-block}.dot.ok{background:#00a995}.dot.error{background:#d44b4b}
-.message{padding:24px;text-align:center;color:#40536a}.updated{font-variant-numeric:tabular-nums}.pagination{font-weight:800;color:#0868ad;white-space:nowrap}
-@container (max-width:800px){.identity{gap:6px}
-.table-header,.departure{grid-template-columns:55px 72px minmax(0,1.3fr) minmax(0,1fr) 52px;gap:5px}
-.table-header{font-size:11px}.time{font-size:17px}.route{width:65px;font-size:13px;grid-template-columns:15px minmax(0,1fr);column-gap:2px;padding:4px 3px}
-.route svg,.route-icon{width:15px;height:15px}.destination{font-size:13px}.stop,.countdown{font-size:11px}.footer{font-size:10px}
-.departure{min-height:45px;padding-block:6px}
-}
-@container (max-width:420px){.identity{gap:4px}
-.table-header,.departure{grid-template-columns:42px 50px minmax(0,1.3fr) minmax(0,1fr) 38px;gap:3px}
-.body{padding:6px 4px 2px}.table-header,.departure{padding-left:4px;padding-right:4px}
-.table-header{font-size:9px}.time{font-size:12px}.route{width:48px;font-size:10px;grid-template-columns:12px minmax(0,1fr)}
-.route svg,.route-icon{width:12px;height:12px}.destination{font-size:11px}.stop,.countdown,.footer{font-size:9px}
-.departure{min-height:36px}
-}
-
-/* Eduvize: samostatné záhlaví pro běžnou stránku, bez zásahu do NSP widgetu. */
-.site-header{display:none}
-body.web-mode{background:#f5f9fc;min-height:100vh;height:auto}
-.web-mode .site-header{display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:1500px;margin:auto;padding:24px 24px 18px}
-.site-brand{display:flex;align-items:center;gap:14px;min-width:0}
-.site-icon{--edu-icon-size:52px}
-.site-eyebrow{font-size:13px;letter-spacing:.14em;font-weight:800;color:#078b9e;text-transform:uppercase}
-.site-heading{font-size:clamp(25px,2.4vw,38px);font-weight:800;letter-spacing:-.04em;line-height:1.12}
-.site-subtitle{font-size:14px;font-weight:650;color:#64819b;margin-top:4px}
-.site-settings{border:1px solid #c7dce6;border-radius:10px;background:white;padding:10px 16px;text-decoration:none;color:#0868ad;font-size:14px;font-weight:700;white-space:nowrap}
-.web-mode .page{width:min(100%,1500px);height:min(78vh,950px);min-height:430px;margin:0 auto;padding:0 24px 26px}
-.web-mode .panel{border:1px solid #dce6ed;box-shadow:0 8px 28px #143b5510}
-.web-mode .head{border-radius:11px 11px 0 0}
-@media(max-width:600px){.web-mode .site-header{padding:16px 12px;gap:8px}.site-brand{gap:8px}.site-icon{--edu-icon-size:40px}.site-heading{font-size:22px}.site-eyebrow{font-size:10px}.site-subtitle{font-size:11px}.site-settings{padding:8px;font-size:11px}.web-mode .page{padding:0 10px 15px}}
-/* Jednotný vzhled modrozelené sekce jako u panelů Eduvize. */
-.head{background:linear-gradient(90deg,#0874b8 0%,#00a995 100%)}
-.head h1{letter-spacing:-.02em}.head .subtitle{opacity:.93}.clock-date{opacity:.9}
-@container (max-width:800px){}
-@container (max-width:420px){}
-
-
-/* Eduvize: výrazný hero panel ve stylu Svátky a jmeniny. */
-.head{position:relative;isolation:isolate;overflow:hidden;border-radius:22px;background:radial-gradient(circle at 88% 56%,rgba(0,186,169,.42) 0%,transparent 31%),linear-gradient(110deg,#103358 0%,#114e75 53%,#168b99 100%);color:#fff}
-.head::before{content:"";position:absolute;z-index:-1;right:-30px;top:-145px;width:470px;height:470px;border-radius:50%;border:2px solid rgba(159,225,231,.15);box-shadow:0 0 0 54px rgba(145,222,229,.055),0 0 0 112px rgba(145,222,229,.035);pointer-events:none}
-.head::after{content:"";position:absolute;z-index:-1;right:55px;top:19px;width:110px;height:110px;border-radius:50%;border:1px solid rgba(226,250,251,.16);box-shadow:0 0 0 18px rgba(226,250,251,.035);pointer-events:none}
-.identity{gap:20px;align-items:center}.bus{border:1px solid rgba(255,255,255,.19);border-radius:22px;background:rgba(255,255,255,.07)}
-.head h1{letter-spacing:-.045em;line-height:1.06}.head .subtitle{margin-top:9px;color:#d4eef2;font-weight:700}
-.clock-time{letter-spacing:-.04em}.clock-date{color:#d4eef2;margin-top:4px}
-.web-mode .head{border-radius:22px}.web-mode .panel{border:0;box-shadow:none;background:transparent;overflow:visible}.web-mode .body{background:#fff;border-radius:20px;margin-top:18px;padding:15px 16px 8px;box-shadow:0 5px 18px #143b5510}.web-mode .footer{background:transparent;border:0;padding:14px 6px}
-.web-mode .page{height:min(78vh,950px);min-height:440px}
-@container (max-width:800px){.head{border-radius:15px}.identity{gap:10px}.bus{border-radius:13px}.head .subtitle{margin-top:5px}.head::after{right:30px;width:75px;height:75px}.web-mode .head{border-radius:15px}}
-@container (max-width:420px){.identity{gap:6px}.bus{border-radius:10px}.head .subtitle{margin-top:3px}.head::after{display:none}}
-
-
-/* V režimu běžné stránky bez stránkování roste obsah přirozeně do výšky. */
-body.show-all,body.show-all .page,body.show-all .panel{height:auto;min-height:0}body.show-all .page{max-height:none}body.show-all .departures-viewport{overflow:visible;flex:none}body.show-all .body{flex:none}body.show-all .panel{overflow:visible}body.show-all .footer{margin-bottom:20px}
-/* Kiosk framing; physical dimensions come from the shared output header. */
-html.kiosk-header-synced .head{border-radius:12px!important}
-</style>
-<style>html.kiosk-output{height:100%}html.kiosk-output body{min-height:100%;margin:0}html.kiosk-output .site-header{display:none!important}html.kiosk-output body{min-height:100dvh;overflow-x:hidden}html.kiosk-output main,html.kiosk-output .shell,html.kiosk-output .container{max-width:none!important;width:100%!important}html.kiosk-output button,html.kiosk-output input,html.kiosk-output select{touch-action:manipulation;min-height:44px}</style><script>if(new URLSearchParams(location.search).get('viewMode')==='kiosk'||new URLSearchParams(location.search).get('output')==='kiosk')document.documentElement.classList.add('kiosk-output');</script><style>html.kiosk-header-synced .head{box-sizing:border-box!important;border:2px solid #cfe8f2!important;border-radius:16px!important;overflow:hidden!important;margin-top:0!important;margin-bottom:0!important}</style><script>/* Apply unified kiosk framing before the parent sizing message arrives. */(function(){const p=new URLSearchParams(location.search);if(p.get('viewMode')==='kiosk'||p.get('output')==='kiosk'){document.documentElement.classList.add('kiosk-header-synced');}})();</script><style>/* Fix actual outer kiosk container spacing, not only the header border. */html.kiosk-header-synced body{margin:0!important}html.kiosk-header-synced .head{margin:0!important}</style><style>
-/* The border is copied from the selected navigation tile in eduvize-kiosek.
-   Only framing is shared: the departures header content and background stay unchanged. */
-html.kiosk-output .page>.panel>.head{
-  border:2px solid #00a995!important;
-  border-radius:12px!important;
-  box-shadow:inset 0 0 0 1px #00a995,0 6px 18px #006b7740!important;
-  outline:none!important;
-  box-sizing:border-box!important;
-  background-clip:padding-box!important}
-</style><style>
-/* Keep the departures header below the top edge, aligned with kiosk menu tiles.
-   The inset belongs to the app viewport, not to the header itself. */
-html.kiosk-output .page{
-  padding:clamp(6px,.9vmin,14px) 0 0!important;
-  box-sizing:border-box!important;
-}
-html.kiosk-output .page>.panel{
-  height:100%!important;
-  min-height:0!important;
-}
-</style><style>html.kiosk-output .page{padding-top:clamp(6px,.9vmin,14px)!important}html.kiosk-output .page>.panel>.head{border:0!important;outline:0!important;box-shadow:none!important;border-radius:12px!important}html.kiosk-output .page>.panel>.head::after{border:0!important;box-shadow:none!important}</style><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.css?v=1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.js?v=2"></script><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=16"></script><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-tokens.css?v=2"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-header.css?v=1"><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/segment-profile.js?v=2"></script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-header.js?v=1"></script></head>
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Odjezdy PID</title>
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-tokens.css?v=20261031-fields-1">
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/transport.css?v=20261031-2">
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.css?v=1">
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-header.css?v=1">
+<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/segment-profile.js?v=2"></script>
+<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-header.js?v=1"></script>
+<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/transport-layout.js?v=20261031-2"></script>
+<script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=16"></script>
+<script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.js?v=2"></script>
+</head>
 <body>
 <header class="site-header"><div class="site-brand"><div class="site-icon" data-edu-app-icon="transport"></div><div><div class="site-eyebrow">Eduvize · Doprava</div><div class="site-heading">Jízdní řády PID</div><div class="site-subtitle">Přehled odjezdů ze zvolených zastávek</div></div></div></header>
 <main class="page"><section class="panel" aria-label="Odjezdy PID">
 <header class="head edu-output-header"><div class="identity edu-header-group"><span class="bus" data-edu-app-icon="transport"></span><div><h1 class="edu-header-title">Odjezdy</h1><div class="subtitle edu-header-meta" id="station">Načítání zastávek…</div></div></div><div class="clock"><div class="clock-time edu-header-title" id="clock">--:--</div><div class="clock-date edu-header-meta" id="date"></div></div></header>
-<div class="body"><div class="table-header"><span>Odjezd</span><span>Linka</span><span>Směr</span><span>Zastávka</span><span>Za</span></div><div class="departures-viewport" id="viewport"><div id="departures" aria-live="off"><div class="message">Načítám jízdní řád…</div></div></div></div>
-<footer class="footer"><span class="state"><span id="dot" class="dot"></span><span id="status">Načítání dat z API</span></span><span>Plánované odjezdy · bez zpoždění</span><span id="pagination" class="pagination"></span><span id="updated" class="updated"></span></footer>
+<div class="body"><div class="table-header"><span>Odjezd</span><span>Linka</span><span class="destination-heading">Směr</span><span class="stop-heading">Zastávka</span><span>Za</span></div><div class="departures-viewport" id="viewport"><div id="departures" aria-live="off"><div class="message">Načítám jízdní řád…</div></div></div></div>
+<footer class="footer"><span class="state"><span id="dot" class="dot"></span><span id="status">Načítání dat z API</span></span><span class="footer-caption">Plánované odjezdy · bez zpoždění</span><span id="pagination" class="pagination"></span><span id="updated" class="updated"></span><span class="version">Odjezdy · v2026.10.31.2</span></footer>
 </section></main>
 <script>
 'use strict';
@@ -181,7 +79,20 @@ function routeBadge(d){
 function buildRow(d){const row=document.createElement('div');row.className='departure';const date=new Date(d.scheduled_at);row.append(textNode('span','time',timeFormat.format(date)),routeBadge(d),textNode('span','destination',tidyName(d.destination||'—')),textNode('span','stop',tidyName(d.stop_name||'—')));const countdown=textNode('span','countdown','—');countdown.dataset.departure=String(date.getTime());row.append(countdown);return row}
 function updateCountdowns(){for(const el of document.querySelectorAll('[data-departure]')){const ms=Number(el.dataset.departure)-Date.now();el.textContent=ms<=0?'odjíždí':Math.ceil(ms/60000)+' min'}}
 function render(){const root=$('departures');root.replaceChildren();const current=pages[pageIndex]||[];if(!current.length){const message=initialLoading?'Načítám jízdní řády…':loadFailed?'Odjezdy se nepodařilo načíst.':'V nastaveném časovém okně nejsou plánované odjezdy.';root.append(textNode('div','message',message))}else{for(const d of current)root.append(buildRow(d))}updateCountdowns();$('pagination').textContent=pages.length>1?`Strana ${pageIndex+1}/${pages.length}`:''}
-function repaginate(){if(showAll){pages=[allDepartures];pageIndex=0;render();return}const viewport=$('viewport');const height=viewport.clientHeight;if(height<=0)return;const sample=allDepartures.length?buildRow(allDepartures[0]):null;let rowHeight=65;if(sample){sample.style.visibility='hidden';$('departures').append(sample);rowHeight=sample.getBoundingClientRect().height+5;sample.remove()}const perPage=Math.max(1,Math.floor(height/Math.max(1,rowHeight)));pages=[];for(let i=0;i<allDepartures.length;i+=perPage)pages.push(allDepartures.slice(i,i+perPage));if(!pages.length)pages=[[]];pageIndex=Math.min(pageIndex,pages.length-1);render()}
+function repaginate(){
+if(showAll){pages=[allDepartures];pageIndex=0;render();return}
+const height=$('viewport').clientHeight;if(height<=0)return;
+const root=$('departures');root.replaceChildren();
+const measured=allDepartures.map(d=>{const row=buildRow(d);root.append(row);return {data:d,row}});
+pages=[];let current=[],used=0;
+for(const item of measured){
+const style=getComputedStyle(item.row),size=item.row.getBoundingClientRect().height+parseFloat(style.marginBottom||0);
+if(current.length&&used+size>height+0.5){pages.push(current);current=[];used=0}
+current.push(item.data);used+=size;
+}
+if(current.length)pages.push(current);if(!pages.length)pages=[[]];
+pageIndex=Math.min(pageIndex,pages.length-1);render();
+}
 async function load(){if(refreshInProgress)return;refreshInProgress=true;try{const staticBase=query.get('staticData')||'./data/departures.json';const url=new URL(staticBase,location.href);let data;
 if(query.has('staticData')){const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status);data=await response.json()}
 else {
@@ -192,6 +103,8 @@ data={generated_at:responses[0]?.generated_at,departures:responses.flatMap(x=>x.
 catch(shardError){console.warn('Úplný export zatím není dostupný:',shardError);const fallback=await fetch('./data/departures.json',{cache:'no-store'});if(!fallback.ok)throw shardError;data=await fallback.json()}
 }if(!Array.isArray(data.departures))throw new Error('Neplatná data PID');const generated=Date.parse(data.generated_at||'');const stale=!Number.isFinite(generated)||Date.now()-generated>36*3600000;const available=new Set(data.departures.map(d=>d.stop_name));const missing=stops.filter(name=>!available.has(name));const valid=[{value:data.departures.filter(d=>stops.includes(d.stop_name))}];const now=Date.now(),until=now+minutes*60000;const merged=valid.flatMap(r=>r.value).filter(d=>{const t=Date.parse(d.scheduled_at);return selectedTypes.has(transportType(d))&&Number.isFinite(t)&&t>=now&&t<=until});const seen=new Set();allDepartures=merged.filter(d=>{const key=[d.stop_id||d.stop_name,d.trip_id||'',d.line,d.destination,d.scheduled_at].join('|');if(seen.has(key))return false;seen.add(key);return true}).sort((a,b)=>Date.parse(a.scheduled_at)-Date.parse(b.scheduled_at)).slice(0,limit);pageIndex=0;initialLoading=false;loadFailed=false;repaginate();setStatus(missing.length?'V exportu chybí: '+missing.join(', '):stale?'Pozor: jízdní řády nejsou aktuálně obnovené':'Plánované odjezdy PID',missing.length||stale?'error':'ok');$('updated').textContent=Number.isFinite(generated)?'Data PID: '+new Intl.DateTimeFormat('cs-CZ',{timeZone:zone,day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(generated)):'Čas aktualizace není dostupný';if(missing.length)console.warn('Zastávky nejsou v exportu',missing)}catch(err){initialLoading=false;loadFailed=true;setStatus('API momentálně není dostupné','error');if(!allDepartures.length)repaginate();console.error('Eduvize PID:',err)}finally{refreshInProgress=false}}
 $('station').textContent=`${stops.length} ${stopWord(stops.length)} · následujících ${minutes} min`;
+function applyTransportLayout(){window.EduvizeTransportLayout.apply(document.body,{web:document.body.classList.contains('web-mode')},innerWidth,innerHeight)}
+applyTransportLayout();window.addEventListener('resize',applyTransportLayout);document.fonts?.ready.then(repaginate);
 updateClock();load();setInterval(()=>{updateClock();updateCountdowns()},10000);setInterval(load,60000);setInterval(()=>{if(!showAll&&pages.length>1){pageIndex=(pageIndex+1)%pages.length;render()}},pageSeconds*1000);new ResizeObserver(()=>repaginate()).observe($('viewport'));
 </script>
 </body>
