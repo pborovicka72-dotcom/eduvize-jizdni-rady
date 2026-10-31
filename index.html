@@ -1,4 +1,4 @@
-<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Odjezdy PID</title>
+<!doctype html><html data-kiosk-app="transport" lang="cs"><head><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-modes.js?v=20261031-kiosk-1"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Odjezdy PID</title>
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-tokens.css?v=20261031-fields-1">
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/transport.css?v=20261031-2">
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.css?v=1">
@@ -8,7 +8,7 @@
 <script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/transport-layout.js?v=20261031-3"></script>
 <script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=16"></script>
 <script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.js?v=2"></script>
-</head>
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/kiosk-output.css?v=20261031-kiosk-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/kiosk-output.js?v=20261031-kiosk-1"></script></head>
 <body>
 <header class="site-header"><div class="site-brand"><div class="site-icon" data-edu-app-icon="transport"></div><div><div class="site-eyebrow">Eduvize · Doprava</div><div class="site-heading">Jízdní řády PID</div><div class="site-subtitle">Přehled odjezdů ze zvolených zastávek</div></div></div></header>
 <main class="page"><section class="panel" aria-label="Odjezdy PID">
@@ -19,7 +19,7 @@
 <script>
 'use strict';
 const query=new URLSearchParams(location.search);
-const showAll=query.get('viewMode')==='web-all';
+const kioskOutput=window.EduvizeOutputModes.isKiosk();const showAll=!kioskOutput&&query.get('viewMode')==='web-all';
 if(showAll)document.body.classList.add('show-all');
 if(['web','web-all','web-pages'].includes(query.get('viewMode'))){document.body.classList.add('web-mode');}
 const names=(query.get('stops')||query.get('name')||'Pod Žvahovem|Hlubočepy').split('|').map(x=>x.trim()).filter(Boolean);
@@ -78,7 +78,8 @@ function routeBadge(d){
 }
 function buildRow(d){const row=document.createElement('div');row.className='departure';const date=new Date(d.scheduled_at);row.append(textNode('span','time',timeFormat.format(date)),routeBadge(d),textNode('span','destination',tidyName(d.destination||'—')),textNode('span','stop',tidyName(d.stop_name||'—')));const countdown=textNode('span','countdown','—');countdown.dataset.departure=String(date.getTime());row.append(countdown);return row}
 function updateCountdowns(){for(const el of document.querySelectorAll('[data-departure]')){const ms=Number(el.dataset.departure)-Date.now();el.textContent=ms<=0?'odjíždí':Math.ceil(ms/60000)+' min'}}
-function render(){const root=$('departures');root.replaceChildren();const current=pages[pageIndex]||[];if(!current.length){const message=initialLoading?'Načítám jízdní řády…':loadFailed?'Odjezdy se nepodařilo načíst.':'V nastaveném časovém okně nejsou plánované odjezdy.';root.append(textNode('div','message',message))}else{for(const d of current)root.append(buildRow(d))}updateCountdowns();$('pagination').textContent=pages.length>1?`Strana ${pageIndex+1}/${pages.length}`:''}
+function render(){const root=$('departures');root.replaceChildren();const current=pages[pageIndex]||[];if(!current.length){const message=initialLoading?'Načítám jízdní řády…':loadFailed?'Odjezdy se nepodařilo načíst.':'V nastaveném časovém okně nejsou plánované odjezdy.';root.append(textNode('div','message',message))}else{for(const d of current)root.append(buildRow(d))}updateCountdowns();$('pagination').textContent=pages.length>1?`Strana ${pageIndex+1}/${pages.length}`:'';if(kioskOutput){transportPrevious.disabled=pageIndex===0;transportNext.disabled=pageIndex>=pages.length-1;transportNav.hidden=pages.length<2}}
+const transportNav=document.createElement('nav');transportNav.className='edu-kiosk-pagination';const transportPrevious=document.createElement('button'),transportNext=document.createElement('button');transportPrevious.textContent='← Předchozí';transportNext.textContent='Další →';transportPrevious.type=transportNext.type='button';transportNav.setAttribute('aria-label','Stránkování odjezdů');transportNav.append(transportPrevious,transportNext);transportNav.hidden=true;if(kioskOutput)document.querySelector('.panel').append(transportNav);transportPrevious.onclick=()=>{pageIndex=Math.max(0,pageIndex-1);render()};transportNext.onclick=()=>{pageIndex=Math.min(pages.length-1,pageIndex+1);render()};
 function repaginate(){
 if(showAll){pages=[allDepartures];pageIndex=0;render();return}
 const height=$('viewport').clientHeight;if(height<=0)return;
@@ -105,7 +106,7 @@ catch(shardError){console.warn('Úplný export zatím není dostupný:',shardErr
 $('station').textContent=`${stops.length} ${stopWord(stops.length)} · následujících ${minutes} min`;
 function applyTransportLayout(){window.EduvizeTransportLayout.apply(document.body,{web:document.body.classList.contains('web-mode')},innerWidth,innerHeight)}
 applyTransportLayout();window.addEventListener('resize',applyTransportLayout);document.fonts?.ready.then(repaginate);
-updateClock();load();setInterval(()=>{updateClock();updateCountdowns()},10000);setInterval(load,60000);setInterval(()=>{if(!showAll&&pages.length>1){pageIndex=(pageIndex+1)%pages.length;render()}},pageSeconds*1000);new ResizeObserver(()=>repaginate()).observe($('viewport'));
+updateClock();load();setInterval(()=>{updateClock();updateCountdowns()},10000);setInterval(load,60000);setInterval(()=>{if(!kioskOutput&&!showAll&&pages.length>1){pageIndex=(pageIndex+1)%pages.length;render()}},pageSeconds*1000);new ResizeObserver(()=>repaginate()).observe($('viewport'));
 </script>
 </body>
 </html>
