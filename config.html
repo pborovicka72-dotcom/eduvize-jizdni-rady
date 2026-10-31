@@ -1,4 +1,4 @@
-<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Nastavení jízdních řádů</title>
+<!doctype html><html lang="cs"><head><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-modes.js?v=20261031-kiosk-1"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Nastavení jízdních řádů</title>
 <script>document.documentElement.classList.add('ev-theme-pending');setTimeout(()=>document.documentElement.classList.remove('ev-theme-pending'),2500);</script>
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-tokens.css?v=20261031-fields-1">
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-components.css?v=20261031">
@@ -39,8 +39,8 @@
 <label>Přepínání stránek (sekund)<input id="pageSeconds" type="number" min="3" max="120" value="10"></label>
 <div class="full"><p class="config-intro">Druhy dopravy</p><div id="transport" class="transport edu-checkbox-options" style="margin-top:10px"><label class="edu-admin__checkbox"><input type="checkbox" value="bus" checked> Autobusy</label><label class="edu-admin__checkbox"><input type="checkbox" value="tram" checked> Tramvaje</label><label class="edu-admin__checkbox"><input type="checkbox" value="metro" checked> Metro</label><label class="edu-admin__checkbox"><input type="checkbox" value="train" checked> Vlaky</label><label class="edu-admin__checkbox"><input type="checkbox" value="ferry" checked> Přívozy</label><label class="edu-admin__checkbox"><input type="checkbox" value="funicular" checked> Lanovka</label></div></div></form>
 <section class="output-modules edu-output-section edu-admin__card" aria-labelledby="outputHeading">
-<h2 id="outputHeading">Výstup a šablona Newline</h2>
-<div class="edu-output-mode-row"><label class="edu-output-type">Typ výstupu<select id="outputType"><option value="nsp" selected>Newline Signage Pro</option><option value="web">Běžná stránka</option></select></label></div>
+<h2 id="outputHeading">Výstup aplikace</h2>
+<div class="edu-output-mode-row"><label class="edu-output-type">Typ výstupu<select id="outputType"><option value="nsp" selected>Newline Signage Pro</option><option value="web">Běžná stránka</option><option value="kiosk">Kiosek</option></select></label></div>
 <p id="previewHelp" class="config-help" role="status">Pro náhled vyberte alespoň jednu zastávku.</p>
 <div id="modulePicker"></div>
 
@@ -50,7 +50,7 @@
 <p class="config-help">Nastavení zastávek i vybraného modulu se přenáší v odkazu. Zobrazeny jsou plánované odjezdy bez informací o zpoždění.</p>
 </section></main>
 <script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=1"></script>
-<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261031-output-1"></script>
+<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261031-kiosk-1"></script>
 <script>
 
 'use strict';
@@ -64,8 +64,8 @@ const typeBoxes=[...document.querySelectorAll('#transport input')];
 const typeSetting=params.get('types');if(typeSetting!==null){const enabled=new Set(typeSetting.split(','));for(const box of typeBoxes)box.checked=enabled.has(box.value)}else{const enabled=new Set(Array.isArray(saved.types)?saved.types:types);for(const box of typeBoxes)box.checked=enabled.has(box.value)}
 
 for(const id of ['minutes','limit','pageSeconds','nearbyKm']){const el=$(id),fallback=el.value;el.required=true;el.value=params.get(id)??saved[id]??fallback;if(!el.checkValidity())el.value=fallback;}
-$('outputType').value=['web','web-all','web-pages'].includes(params.get('viewMode'))?'web':'nsp';
-function viewMode(){return $('outputType').value==='web'?'web-all':'nsp'}
+$('outputType').value=params.get('viewMode')==='kiosk'?'kiosk':['web','web-all','web-pages'].includes(params.get('viewMode'))?'web':'nsp';
+function viewMode(){return $('outputType').value==='kiosk'?'kiosk':$('outputType').value==='web'?'web-all':'nsp'}
 const segmentDefaults={orientation:'landscape',style:1,block:1};
 let segmentState={orientation:params.get('segment_orientation')||saved.segment?.orientation||segmentDefaults.orientation,style:Number(params.get('segment_style')||saved.segment?.style||1),block:Number(params.get('segment_block')||saved.segment?.block||1)};
 const moduleHost=$('modulePicker');let modulePicker=null,moduleTimer=0;
@@ -77,7 +77,7 @@ function renderSuggestions(){const box=$('suggestions');box.replaceChildren();co
 function toggleStop(name){if(selected.includes(name)){selected.splice(selected.indexOf(name),1);message('Odebrána zastávka: '+name)}else{selected.push(name);message('Přidána zastávka: '+name)}renderSelected();renderSuggestions();refreshNearbyButtons()}
 function showNearbyForStop(name){const points=stopCoordinates[name];if(!Array.isArray(points)||!points.length){nearbyOrigin=null;nearby.replaceChildren();nearby.textContent='Souřadnice této zastávky nejsou dostupné.';return}const point=points.find(p=>Array.isArray(p)&&Number.isFinite(Number(p[0]))&&Number.isFinite(Number(p[1])));if(!point){nearbyOrigin=null;nearby.replaceChildren();nearby.textContent='Souřadnice této zastávky nejsou dostupné.';return}showNearby(Number(point[0]),Number(point[1]),name,'stop')}
 function refreshNearbyButtons(){for(const b of nearby.querySelectorAll('button[data-stop]')){const chosen=selected.includes(b.dataset.stop);b.classList.toggle('chosen',chosen);b.setAttribute('aria-pressed',String(chosen));b.textContent=(chosen?'✓ ':'+ ')+b.dataset.stop+' · '+b.dataset.distance+' m'}}
-function outputUrl(){if(!selected.length)throw Error('Vyberte alespoň jednu zastávku.');const url=new URL('./index.html',location.href);url.searchParams.set('stops',selected.join('|'));const checked=typeBoxes.filter(x=>x.checked).map(x=>x.value);if(!checked.length)throw Error('Vyberte alespoň jeden druh dopravy.');url.searchParams.set('types',checked.join(','));for(const key of ['minutes','limit','pageSeconds']){const el=$(key);if(!el.reportValidity())throw Error('Zkontrolujte číselné nastavení.');url.searchParams.set(key,el.value)}url.searchParams.set('viewMode',viewMode());url.searchParams.set('v','20261031-3');if(viewMode()==='nsp'){const segment=segmentState;for(const [key,value] of Object.entries(segment))url.searchParams.set('segment_'+key,String(value))}return url.href}
+function outputUrl(){if(!selected.length)throw Error('Vyberte alespoň jednu zastávku.');const url=new URL('./index.html',location.href);url.searchParams.set('stops',selected.join('|'));const checked=typeBoxes.filter(x=>x.checked).map(x=>x.value);if(!checked.length)throw Error('Vyberte alespoň jeden druh dopravy.');url.searchParams.set('types',checked.join(','));for(const key of ['minutes','limit','pageSeconds']){const el=$(key);if(!el.reportValidity())throw Error('Zkontrolujte číselné nastavení.');url.searchParams.set(key,el.value)}url.searchParams.set('viewMode',viewMode());url.searchParams.set('v','20261031-3');if(viewMode()==='nsp'){const segment=segmentState;for(const [key,value] of Object.entries(segment))url.searchParams.set('segment_'+key,String(value))}return window.EduvizeOutputModes.url(url,viewMode()).href}
 function save(){try{localStorage.setItem('eduvize-pid-config',JSON.stringify({stops:selected,viewMode:viewMode(),segment:segmentState,types:typeBoxes.filter(x=>x.checked).map(x=>x.value),...Object.fromEntries(['minutes','limit','pageSeconds','nearbyKm'].map(k=>[k,$(k).value]))}));return true}catch{return false}}
 let nearbyOrigin=null;const radiusKm=()=>Math.min(10,Math.max(.1,Number($('nearbyKm').value)||1));$('nearbyKm').addEventListener('input',()=>{if(nearbyOrigin)showNearby(...nearbyOrigin)});const weatherApi='https://eduvize-weather.onrender.com';
 const schoolInput=$('search'),schoolResults=$('schoolResults'),nearby=$('nearby');
@@ -128,7 +128,7 @@ segmentState=modulePicker.get();syncModuleMode();
 function syncModuleMode(){
 if(!modulePicker)return;
 const valid=previewSettingsValid(),web=viewMode()!=='nsp';
-modulePicker.setMode(web?'web':'nsp');
+modulePicker.setMode(viewMode()==='kiosk'?'kiosk':web?'web':'nsp');
 moduleHost.querySelector('#ev-preview-wrap').hidden=!valid;
 moduleHost.querySelector('h3').hidden=!valid||web;
 }
