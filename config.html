@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-tokens.css?v=20261031-integrity-1">
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-components.css?v=20261031">
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-shell.css?v=20261031-header-home-5">
-<script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=20261031-page-start-1"></script>
+<script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=profiles-20261031-1"></script>
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.css?v=20261031-controls-gap-56">
 
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.css?v=20261031-identity-gap-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.js?v=2"></script><style>
@@ -43,7 +43,7 @@
 <p class="config-help">Nastavení zastávek i vybraného modulu se přenáší v odkazu. Zobrazeny jsou plánované odjezdy bez informací o zpoždění.</p>
 </section></main>
 <script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=1"></script>
-<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261031-single-preview-55"></script>
+<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=profiles-20261031-1"></script>
 <script>
 
 'use strict';
@@ -157,5 +157,13 @@ renderSelected();renderSuggestions();if(nearbyOrigin)showNearby(...nearbyOrigin)
 message('Načteno '+available.length+' zastávek PID. Zadejte alespoň dva znaky a klikněte na nalezenou zastávku.');
 }catch(err){message('Nepodařilo se načíst seznam zastávek: '+err.message,true);renderSelected()}
 })();
-</script></body></html>
+</script>
+<script id="eduvize-profile-adapter">
+window.EduvizeProfileAdapter={app:"transport",
+ready:new Promise((resolve,reject)=>{let n=0;const wait=()=>{if(available.length)resolve();else if(n++>300)reject(Error('Nejprve musí být dostupný seznam zastávek.'));else setTimeout(wait,100);};wait();}),
+read:()=>({schemaVersion:1,values:window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','outputType']).read(),stops:[...selected],types:typeBoxes.filter(e=>e.checked).map(e=>e.value),segment:{...segmentState}}),
+apply:async config=>{if(!Array.isArray(config.stops)||!Array.isArray(config.types))throw Error('Neplatné nastavení zastávek.');const missing=config.stops.filter(v=>!available.includes(v));if(missing.length)throw Error('Zastávka již není v katalogu: '+missing.join(', '));window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','outputType']).apply(config.values);selected.splice(0,selected.length,...config.stops);for(const e of typeBoxes)e.checked=config.types.includes(e.value);if(config.segment)segmentState={...config.segment};renderSelected();renderSuggestions();refreshNearbyButtons();renderModulePreview();save();}};
+window.dispatchEvent(new Event("eduvize-profile-adapter-ready"));
+</script>
+</body></html>
 
