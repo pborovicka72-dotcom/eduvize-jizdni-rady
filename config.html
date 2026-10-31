@@ -39,7 +39,8 @@
 <label>Přepínání stránek (sekund)<input id="pageSeconds" type="number" min="3" max="120" value="10"></label>
 <div class="full"><p class="config-intro">Druhy dopravy</p><div id="transport" class="transport edu-checkbox-options" style="margin-top:10px"><label class="edu-admin__checkbox"><input type="checkbox" value="bus" checked> Autobusy</label><label class="edu-admin__checkbox"><input type="checkbox" value="tram" checked> Tramvaje</label><label class="edu-admin__checkbox"><input type="checkbox" value="metro" checked> Metro</label><label class="edu-admin__checkbox"><input type="checkbox" value="train" checked> Vlaky</label><label class="edu-admin__checkbox"><input type="checkbox" value="ferry" checked> Přívozy</label><label class="edu-admin__checkbox"><input type="checkbox" value="funicular" checked> Lanovka</label></div></div></form>
 <section class="output-modules edu-output-section edu-admin__card" aria-labelledby="outputHeading">
-<h2 id="outputHeading">Šablona a segment Newline</h2>
+<h2 id="outputHeading">Výstup a šablona Newline</h2>
+<div class="edu-output-mode-row"><label class="edu-output-type">Typ výstupu<select id="outputType"><option value="nsp" selected>Newline Signage Pro</option><option value="web">Běžná stránka</option></select></label></div>
 <p id="previewHelp" class="config-help" role="status">Pro náhled vyberte alespoň jednu zastávku.</p>
 <div id="modulePicker"></div>
 
@@ -63,7 +64,8 @@ const typeBoxes=[...document.querySelectorAll('#transport input')];
 const typeSetting=params.get('types');if(typeSetting!==null){const enabled=new Set(typeSetting.split(','));for(const box of typeBoxes)box.checked=enabled.has(box.value)}else{const enabled=new Set(Array.isArray(saved.types)?saved.types:types);for(const box of typeBoxes)box.checked=enabled.has(box.value)}
 
 for(const id of ['minutes','limit','pageSeconds','nearbyKm']){const el=$(id),fallback=el.value;el.required=true;el.value=params.get(id)??saved[id]??fallback;if(!el.checkValidity())el.value=fallback;}
-function viewMode(){return 'nsp'}
+$('outputType').value=['web','web-all','web-pages'].includes(params.get('viewMode'))?'web':'nsp';
+function viewMode(){return $('outputType').value==='web'?'web-all':'nsp'}
 const segmentDefaults={orientation:'landscape',style:1,block:1};
 let segmentState={orientation:params.get('segment_orientation')||saved.segment?.orientation||segmentDefaults.orientation,style:Number(params.get('segment_style')||saved.segment?.style||1),block:Number(params.get('segment_block')||saved.segment?.block||1)};
 const moduleHost=$('modulePicker');let modulePicker=null,moduleTimer=0;
@@ -118,17 +120,19 @@ if(!window.EduvizeNSPPicker||!window.EduvizeNSPLayouts){$('previewHelp').textCon
 if(!modulePicker){
 modulePicker=window.EduvizeNSPPicker.mount(moduleHost,{initial:segmentState,interactivePreview:true,previewUrl:state=>{
 if(!previewSettingsValid())return 'about:blank';
-const url=new URL(outputUrl());for(const [key,value] of Object.entries(state))url.searchParams.set('segment_'+key,String(value));url.searchParams.set('preview','1');return url.href;
+const url=new URL(outputUrl());if(viewMode()==='nsp')for(const [key,value] of Object.entries(state))url.searchParams.set('segment_'+key,String(value));url.searchParams.set('preview','1');return url.href;
 },onChange:state=>{segmentState=state;syncModuleMode()}});
 }else modulePicker.set(segmentState);
 segmentState=modulePicker.get();syncModuleMode();
 }
 function syncModuleMode(){
 if(!modulePicker)return;
-const valid=previewSettingsValid();
+const valid=previewSettingsValid(),web=viewMode()!=='nsp';
+modulePicker.setMode(web?'web':'nsp');
 moduleHost.querySelector('#ev-preview-wrap').hidden=!valid;
-moduleHost.querySelector('h3').hidden=!valid;
+moduleHost.querySelector('h3').hidden=!valid||web;
 }
+$('outputType').addEventListener('change',renderModulePreview);
 for(const id of ['minutes','limit','pageSeconds'])$(id).addEventListener('input',scheduleModulePreview);
 for(const box of typeBoxes)box.addEventListener('change',scheduleModulePreview);
 $('saveSettings').onclick=()=>{try{outputUrl();message(save()?'Nastavení bylo uloženo v tomto prohlížeči.':'Prohlížeč nepovolil uložení. Použijte odkaz na výstup.',false)}catch(err){message(err.message,true)}};
