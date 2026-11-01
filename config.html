@@ -18,10 +18,11 @@
 @media(max-width:850px){.config-panel{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:470px){.config-panel{grid-template-columns:1fr}}
 </style><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/choice-list.css?v=1"><link rel="icon" type="image/svg+xml" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/assets/eduvize-favicon.svg?v=20261031-unified-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-header.js?v=6"></script><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-navigation.js?v=1"></script></head><body class="ev-admin">
-<main class="edu-admin-page"><header class="edu-page-header"><div class="edu-page-header__identity"><div class="edu-page-header__icon" data-edu-app-icon="transport" aria-hidden="true"></div><div class="edu-page-header__titles"><div class="edu-page-header__eyebrow">Eduvize · Doprava</div><h1 class="edu-page-header__title">Jízdní řády PID</h1></div></div><p class="edu-page-header__description">Nastavení zobrazovaných odjezdů</p></header>
+<main class="edu-admin-page"><header class="edu-page-header"><div class="edu-page-header__identity"><div class="edu-page-header__icon" data-edu-app-icon="transport" aria-hidden="true"></div><div class="edu-page-header__titles"><div class="edu-page-header__eyebrow">Eduvize · Doprava</div><h1 class="edu-page-header__title">Jízdní řády</h1></div></div><p class="edu-page-header__description">Nastavení zobrazovaných odjezdů</p></header>
 <form id="form" class="config-panel edu-admin__card">
-<label class="full">Vyhledat školu nebo zastávku PID<input id="search" enterkeyhint="search" type="search" placeholder="Název školy, obec, adresa nebo zastávka…" autocomplete="off" aria-describedby="searchHelp"></label>
-<p id="searchHelp" class="config-help">Nejprve nabízíme školy z rejstříku MŠMT, poté zastávky PID. Vyhledávání funguje i bez diakritiky.</p>
+<label class="full">Zdroj jízdních řádů<select id="source"><option value="pid">PID · plánované a živé odjezdy</option><option value="cz_gtfs">Česká republika · plánované odjezdy GTFS</option></select></label>
+<label class="full">Vyhledat školu nebo zastávku<input id="search" enterkeyhint="search" type="search" placeholder="Název školy, obec, adresa nebo zastávka…" autocomplete="off" aria-describedby="searchHelp"></label>
+<p id="searchHelp" class="config-help">Nejprve nabízíme školy z rejstříku MŠMT, poté zastávky vybraného zdroje. Vyhledávání funguje i bez diakritiky.</p>
 <div id="schoolResults" class="edu-choice-list full" aria-live="polite"></div>
 <div id="suggestions" class="edu-choice-list full" aria-live="polite"></div>
 <label class="full">Maximální vzdálenost okolních zastávek (km)<input id="nearbyKm" type="number" min="0.1" max="10" step="0.1" value="1"></label><div id="nearby" class="edu-choice-list full" aria-live="polite"></div>
@@ -70,9 +71,9 @@ function renderSuggestions(){const box=$('suggestions');box.replaceChildren();co
 function toggleStop(name){if(selected.includes(name)){selected.splice(selected.indexOf(name),1);message('Odebrána zastávka: '+name)}else{selected.push(name);message('Přidána zastávka: '+name)}renderSelected();renderSuggestions();refreshNearbyButtons()}
 function showNearbyForStop(name){const points=stopCoordinates[name];if(!Array.isArray(points)||!points.length){nearbyOrigin=null;nearby.replaceChildren();nearby.textContent='Souřadnice této zastávky nejsou dostupné.';return}const point=points.find(p=>Array.isArray(p)&&Number.isFinite(Number(p[0]))&&Number.isFinite(Number(p[1])));if(!point){nearbyOrigin=null;nearby.replaceChildren();nearby.textContent='Souřadnice této zastávky nejsou dostupné.';return}showNearby(Number(point[0]),Number(point[1]),name,'stop')}
 function refreshNearbyButtons(){for(const b of nearby.querySelectorAll('button[data-stop]')){const chosen=selected.includes(b.dataset.stop);b.classList.toggle('chosen',chosen);b.setAttribute('aria-pressed',String(chosen));b.textContent=(chosen?'✓ ':'+ ')+b.dataset.stop+' · '+b.dataset.distance+' m'}}
-function outputUrl(){const url=new URL('./index.html',location.href);url.searchParams.set('stops',selected.join('|'));const checked=typeBoxes.filter(x=>x.checked).map(x=>x.value);url.searchParams.set('types',checked.join(','));for(const key of ['minutes','limit','pageSeconds']){const el=$(key);url.searchParams.set(key,el.value)}url.searchParams.set('viewMode',viewMode());url.searchParams.set('v','20261101-delay-2');if(viewMode()==='nsp'){const segment=window.EduvizeSegmentSelection?.params()||segmentState;for(const [key,value] of Object.entries(segment))url.searchParams.set('segment_'+key,String(value))}return window.EduvizeOutputModes.url(url,viewMode()).href}
-function validatedOutputUrl(){if(!selected.length)throw Error('Vyberte alespoň jednu zastávku.');if(!typeBoxes.some(box=>box.checked))throw Error('Vyberte alespoň jeden druh dopravy.');if(!$('form').reportValidity())throw Error('Zkontrolujte číselné nastavení.');return outputUrl()}
-function save(){segmentState=window.EduvizeSegmentSelection?.params()||segmentState;try{localStorage.setItem('eduvize-pid-config',JSON.stringify({stops:selected,viewMode:viewMode(),segment:segmentState,types:typeBoxes.filter(x=>x.checked).map(x=>x.value),...Object.fromEntries(['minutes','limit','pageSeconds','nearbyKm'].map(k=>[k,$(k).value]))}));return true}catch{return false}}
+function outputUrl(){const url=new URL('./index.html',location.href);url.searchParams.set('source',$('source').value);url.searchParams.set('stops',selected.join('|'));const checked=typeBoxes.filter(x=>x.checked).map(x=>x.value);url.searchParams.set('types',checked.join(','));for(const key of ['minutes','limit','pageSeconds']){const el=$(key);url.searchParams.set(key,el.value)}url.searchParams.set('viewMode',viewMode());url.searchParams.set('v','20261101-delay-2');if(viewMode()==='nsp'){const segment=window.EduvizeSegmentSelection?.params()||segmentState;for(const [key,value] of Object.entries(segment))url.searchParams.set('segment_'+key,String(value))}return window.EduvizeOutputModes.url(url,viewMode()).href}
+function validatedOutputUrl(){if(catalogueSource!==$('source').value)throw Error('Počkejte na načtení zastávek vybraného zdroje.');if(!selected.length)throw Error('Vyberte alespoň jednu zastávku.');if(!typeBoxes.some(box=>box.checked))throw Error('Vyberte alespoň jeden druh dopravy.');if(!$('form').reportValidity())throw Error('Zkontrolujte číselné nastavení.');return outputUrl()}
+function save(){segmentState=window.EduvizeSegmentSelection?.params()||segmentState;try{localStorage.setItem('eduvize-pid-config',JSON.stringify({source:$('source').value,stops:selected,viewMode:viewMode(),segment:segmentState,types:typeBoxes.filter(x=>x.checked).map(x=>x.value),...Object.fromEntries(['minutes','limit','pageSeconds','nearbyKm'].map(k=>[k,$(k).value]))}));return true}catch{return false}}
 let nearbyOrigin=null;const radiusKm=()=>Math.min(10,Math.max(.1,Number($('nearbyKm').value)||1));$('nearbyKm').addEventListener('input',()=>{if(nearbyOrigin)showNearby(...nearbyOrigin)});const weatherApi='https://eduvize-weather.onrender.com';
 const schoolInput=$('search'),schoolResults=$('schoolResults'),nearby=$('nearby');
 let schoolTimer=0,schoolSeq=0,schoolChoiceSeq=0,schoolCatalog=null;
@@ -80,15 +81,15 @@ async function getSchoolCatalog(){if(schoolCatalog)return schoolCatalog;const re
 function distanceKm(a,b,c,d){const rad=Math.PI/180;const x=(c-a)*rad,y=(d-b)*rad;const z=Math.sin(x/2)**2+Math.cos(a*rad)*Math.cos(c*rad)*Math.sin(y/2)**2;return 12742*Math.asin(Math.min(1,Math.sqrt(z)))}
 function showNearby(lat,lon,label,origin='school'){
 nearbyOrigin=[lat,lon,label,origin];nearby.replaceChildren();
-const radius=radiusKm();const found=[];
+const radius=radiusKm();const found=[];const allowed=new Set(available);
 for(const [name,points] of Object.entries(stopCoordinates)){
-if(!name.trim()||/^(?:E\d+(?:\s*\([A-Z]\))?|Kolej\s*\d+(?:\s*-\s*(?:Start|End))?|P-?\s*Holeš\.?-?Rokytka)$/i.test(name)||name===label||!available.includes(name))continue;
+if(!name.trim()||/^(?:E\d+(?:\s*\([A-Z]\))?|Kolej\s*\d+(?:\s*-\s*(?:Start|End))?|P-?\s*Holeš\.?-?Rokytka)$/i.test(name)||name===label||!allowed.has(name))continue;
 let km=Infinity;
 if(!Array.isArray(points))continue;for(const point of points){if(Array.isArray(point)&&Number.isFinite(Number(point[0]))&&Number.isFinite(Number(point[1])))km=Math.min(km,distanceKm(lat,lon,Number(point[0]),Number(point[1])));}
 if(km<=radius&&Number.isFinite(km))found.push({name,km});
 }
 found.sort((a,b)=>a.km-b.km);
-if(!found.length){nearby.textContent='V okruhu '+radius.toLocaleString('cs')+' km nejsou nalezeny další zastávky PID.';return}
+if(!found.length){nearby.textContent='V okruhu '+radius.toLocaleString('cs')+' km nejsou nalezeny další zastávky vybraného zdroje.';return}
 const title=document.createElement('p');title.className='config-intro';
 title.textContent=origin==='stop'?'Další zastávky v okolí: '+label+' (do '+radius.toLocaleString('cs')+' km)':'Nejbližší zastávky u školy (do '+radius.toLocaleString('cs')+' km)';
 nearby.append(title);
@@ -116,43 +117,33 @@ for(const id of ['minutes','limit','pageSeconds'])$(id).addEventListener('input'
 for(const box of typeBoxes)box.addEventListener('change',scheduleModulePreview);
 $('saveSettings').onclick=()=>{try{validatedOutputUrl();message(save()?'Nastavení bylo uloženo v tomto prohlížeči.':'Prohlížeč nepovolil uložení. Použijte odkaz na výstup.',false)}catch(err){message(err.message,true)}};
 renderModulePreview();
-// The full stop catalogue is independent of the currently published departures.
-renderSelected();message('Načítám seznam zastávek PID…');
-(async()=>{
-try{
-let catalog=[];
-try{
-const response=await fetch('./data/stops.json',{cache:'no-store'});
-if(!response.ok)throw Error('HTTP '+response.status);
-const full=await response.json();
-if(!Array.isArray(full.stops)||!full.stops.length)throw Error('Prázdný katalog zastávek');
-catalog=full.stops;
-if(full.coordinates&&typeof full.coordinates==='object')stopCoordinates=full.coordinates;
-}catch{
-const response=await fetch('./data/departures.json',{cache:'no-store'});
-if(!response.ok)throw Error('HTTP '+response.status);
-const data=await response.json();
-if(!Array.isArray(data.departures))throw Error('Neplatný export odjezdů');
-catalog=data.departures.map(d=>d.stop_name);
+// Source catalogues are independent; national IDs must never be used for PID realtime.
+let catalogueRequest=0,catalogueSource=null;
+async function loadStopCatalog(source,requested=[]){
+const request=++catalogueRequest;message('Načítám seznam zastávek…');
+const response=await fetch(source==='cz_gtfs'?'./data/national/stops.json':'./data/stops.json');
+if(!response.ok)throw Error('Katalog zastávek není dostupný (HTTP '+response.status+')');
+const full=await response.json();if(!Array.isArray(full.stops)||!full.stops.length)throw Error('Prázdný katalog zastávek');
+if(request!==catalogueRequest)return;catalogueSource=source;
+available.splice(0,available.length,...new Set(full.stops));available.sort((a,b)=>a.localeCompare(b,'cs'));
+stopCoordinates=full.coordinates||{};selected.splice(0,selected.length,...requested.filter(name=>available.includes(name)));
+renderSelected();renderSuggestions();if(nearbyOrigin)showNearby(...nearbyOrigin);renderModulePreview();
+message('Načteno '+available.length+' zastávek · '+(source==='cz_gtfs'?'ČR, plánované časy bez zpoždění. Zdroj: Patrick Zandl, CC BY 4.0.':'PID, včetně živých dat.'));
 }
-available.push(...new Set(catalog.filter(name=>typeof name==='string'&&name.trim())));
-available.sort((a,b)=>a.localeCompare(b,'cs'));
-const requested=params.has('stops')?(params.get('stops')||'').split('|'):(Array.isArray(saved.stops)?saved.stops:[]);
-for(const name of requested)if(available.includes(name)&&!selected.includes(name))selected.push(name);
-renderSelected();renderSuggestions();if(nearbyOrigin)showNearby(...nearbyOrigin);
-message('Načteno '+available.length+' zastávek PID. Zadejte alespoň dva znaky a klikněte na nalezenou zastávku.');
-}catch(err){message('Nepodařilo se načíst seznam zastávek: '+err.message,true);renderSelected()}
-})();
+$('source').value=(params.get('source')||saved.source)==='cz_gtfs'?'cz_gtfs':'pid';
+renderSelected();loadStopCatalog($('source').value,params.has('stops')?(params.get('stops')||'').split('|'):(saved.stops||[])).catch(error=>message(error.message,true));
+$('source').addEventListener('change',async()=>{schoolSeq++;schoolChoiceSeq++;clearTimeout(schoolTimer);schoolResults.replaceChildren();nearby.replaceChildren();nearbyOrigin=null;try{await loadStopCatalog($('source').value,[]);save()}catch(error){message(error.message,true)}});
 </script>
 <script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261101-delay-2"></script>
 <script>window.EduvizeSegmentSelection?.set(segmentState);</script>
 <script id="eduvize-profile-adapter">
 window.EduvizeProfileAdapter={app:"transport",
 ready:new Promise((resolve,reject)=>{let n=0;const wait=()=>{if(available.length)resolve();else if(n++>300)reject(Error('Nejprve musí být dostupný seznam zastávek.'));else setTimeout(wait,100);};wait();}),
-read:()=>({schemaVersion:1,values:window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).read(),stops:[...selected],types:typeBoxes.filter(e=>e.checked).map(e=>e.value),segment:window.EduvizeSegmentSelection?.params()||{...segmentState}}),
-apply:async config=>{if(!Array.isArray(config.stops)||!Array.isArray(config.types))throw Error('Neplatné nastavení zastávek.');const missing=config.stops.filter(v=>!available.includes(v));if(missing.length)throw Error('Zastávka již není v katalogu: '+missing.join(', '));window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).apply({...config.values,viewMode:config.values?.viewMode||config.values?.outputType||'nsp'});selected.splice(0,selected.length,...config.stops);for(const e of typeBoxes)e.checked=config.types.includes(e.value);if(config.segment)segmentState={...config.segment};renderSelected();renderSuggestions();refreshNearbyButtons();renderModulePreview();save();}};
+read:()=>({schemaVersion:1,source:$('source').value,values:window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).read(),stops:[...selected],types:typeBoxes.filter(e=>e.checked).map(e=>e.value),segment:window.EduvizeSegmentSelection?.params()||{...segmentState}}),
+apply:async config=>{if(!Array.isArray(config.stops)||!Array.isArray(config.types))throw Error('Neplatné nastavení zastávek.');const source=config.source==='cz_gtfs'?'cz_gtfs':'pid';if($('source').value!==source){await loadStopCatalog(source,[]);$('source').value=source}const missing=config.stops.filter(v=>!available.includes(v));if(missing.length)throw Error('Zastávka již není v katalogu: '+missing.join(', '));window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).apply({...config.values,viewMode:config.values?.viewMode||config.values?.outputType||'nsp'});selected.splice(0,selected.length,...config.stops);for(const e of typeBoxes)e.checked=config.types.includes(e.value);if(config.segment)segmentState={...config.segment};renderSelected();renderSuggestions();refreshNearbyButtons();renderModulePreview();save();}};
 window.dispatchEvent(new Event("eduvize-profile-adapter-ready"));
 </script>
 </body></html>
+
 
 
