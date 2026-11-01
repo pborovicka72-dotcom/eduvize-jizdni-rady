@@ -33,9 +33,9 @@
 <div class="full"><p class="config-intro">Druhy dopravy</p><div id="transport" class="transport edu-checkbox-options" style="margin-top:10px"><label class="edu-admin__checkbox"><input type="checkbox" value="bus" checked> Autobusy</label><label class="edu-admin__checkbox"><input type="checkbox" value="tram" checked> Tramvaje</label><label class="edu-admin__checkbox"><input type="checkbox" value="metro" checked> Metro</label><label class="edu-admin__checkbox"><input type="checkbox" value="train" checked> Vlaky</label><label class="edu-admin__checkbox"><input type="checkbox" value="ferry" checked> Přívozy</label><label class="edu-admin__checkbox"><input type="checkbox" value="funicular" checked> Lanovka</label></div></div></form>
 <section class="output-modules edu-output-section edu-admin__card" aria-labelledby="outputHeading">
 <h2 id="outputHeading">Výstup aplikace</h2>
-<div class="edu-output-mode-row"><label class="edu-output-type">Typ výstupu<select id="outputType"><option value="nsp" selected>Newline Signage Pro</option><option value="web">Běžná stránka</option><option value="kiosk">Kiosek</option></select></label></div>
+<div class="edu-output-mode-row"><label class="edu-output-type">Typ výstupu<select id="viewMode"><option value="nsp" selected>Newline Signage Pro</option><option value="web">Běžná stránka</option><option value="kiosk">Kiosek</option></select></label></div>
 <p id="previewHelp" class="config-help" role="status">Pro náhled vyberte alespoň jednu zastávku.</p>
-<div id="modulePicker"></div>
+
 
 <div class="config-actions edu-output-actions edu-admin__actions"><button class="edu-admin__button" type="submit" form="form">Použít a otevřít výstup</button><button class="edu-admin__button edu-admin__button--secondary" type="button" id="copy">Kopírovat odkaz</button><button class="edu-admin__button edu-admin__button--secondary" type="button" id="saveSettings">Uložit v prohlížeči</button></div>
 <p id="notice" class="config-help" role="status"></p>
@@ -43,7 +43,7 @@
 <p class="config-help">Nastavení zastávek i vybraného modulu se přenáší v odkazu. Zobrazeny jsou plánované odjezdy bez informací o zpoždění.</p>
 </section></main>
 <script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=1"></script>
-<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=profiles-20261031-1"></script>
+
 <script>
 
 'use strict';
@@ -57,11 +57,11 @@ const typeBoxes=[...document.querySelectorAll('#transport input')];
 const typeSetting=params.get('types');if(typeSetting!==null){const enabled=new Set(typeSetting.split(','));for(const box of typeBoxes)box.checked=enabled.has(box.value)}else{const enabled=new Set(Array.isArray(saved.types)?saved.types:types);for(const box of typeBoxes)box.checked=enabled.has(box.value)}
 
 for(const id of ['minutes','limit','pageSeconds','nearbyKm']){const el=$(id),fallback=el.value;el.required=true;el.value=params.get(id)??saved[id]??fallback;if(!el.checkValidity())el.value=fallback;}
-$('outputType').value=params.get('viewMode')==='kiosk'?'kiosk':['web','web-all','web-pages'].includes(params.get('viewMode'))?'web':'nsp';
-function viewMode(){return $('outputType').value==='kiosk'?'kiosk':$('outputType').value==='web'?'web-all':'nsp'}
+$('viewMode').value=(params.get('viewMode')||saved.viewMode)==='kiosk'?'kiosk':['web','web-all','web-pages'].includes(params.get('viewMode')||saved.viewMode)?'web':'nsp';
+function viewMode(){return $('viewMode').value}
 const segmentDefaults={orientation:'landscape',style:1,block:1};
 let segmentState={orientation:params.get('segment_orientation')||saved.segment?.orientation||segmentDefaults.orientation,style:Number(params.get('segment_style')||saved.segment?.style||1),block:Number(params.get('segment_block')||saved.segment?.block||1)};
-const moduleHost=$('modulePicker');let modulePicker=null,moduleTimer=0;
+let moduleTimer=0;
 
 function message(s,err=false){$('notice').textContent=s;$('notice').classList.toggle('error',err)}
 function renderSelected(){scheduleModulePreview();$('selected').replaceChildren();if(!selected.length){$('selected').textContent='Zatím není vybrána žádná zastávka.';return}for(const name of selected){const chip=document.createElement('span');chip.className='edu-choice-chip';chip.append(document.createTextNode(name));const b=document.createElement('button');b.type='button';b.className='edu-choice';b.textContent='×';b.setAttribute('aria-label','Odebrat '+name);b.onclick=()=>toggleStop(name);chip.append(b);$('selected').append(chip)}}
@@ -70,8 +70,9 @@ function renderSuggestions(){const box=$('suggestions');box.replaceChildren();co
 function toggleStop(name){if(selected.includes(name)){selected.splice(selected.indexOf(name),1);message('Odebrána zastávka: '+name)}else{selected.push(name);message('Přidána zastávka: '+name)}renderSelected();renderSuggestions();refreshNearbyButtons()}
 function showNearbyForStop(name){const points=stopCoordinates[name];if(!Array.isArray(points)||!points.length){nearbyOrigin=null;nearby.replaceChildren();nearby.textContent='Souřadnice této zastávky nejsou dostupné.';return}const point=points.find(p=>Array.isArray(p)&&Number.isFinite(Number(p[0]))&&Number.isFinite(Number(p[1])));if(!point){nearbyOrigin=null;nearby.replaceChildren();nearby.textContent='Souřadnice této zastávky nejsou dostupné.';return}showNearby(Number(point[0]),Number(point[1]),name,'stop')}
 function refreshNearbyButtons(){for(const b of nearby.querySelectorAll('button[data-stop]')){const chosen=selected.includes(b.dataset.stop);b.classList.toggle('chosen',chosen);b.setAttribute('aria-pressed',String(chosen));b.textContent=(chosen?'✓ ':'+ ')+b.dataset.stop+' · '+b.dataset.distance+' m'}}
-function outputUrl(){if(!selected.length)throw Error('Vyberte alespoň jednu zastávku.');const url=new URL('./index.html',location.href);url.searchParams.set('stops',selected.join('|'));const checked=typeBoxes.filter(x=>x.checked).map(x=>x.value);if(!checked.length)throw Error('Vyberte alespoň jeden druh dopravy.');url.searchParams.set('types',checked.join(','));for(const key of ['minutes','limit','pageSeconds']){const el=$(key);if(!el.reportValidity())throw Error('Zkontrolujte číselné nastavení.');url.searchParams.set(key,el.value)}url.searchParams.set('viewMode',viewMode());url.searchParams.set('v','20261031-3');if(viewMode()==='nsp'){const segment=segmentState;for(const [key,value] of Object.entries(segment))url.searchParams.set('segment_'+key,String(value))}return window.EduvizeOutputModes.url(url,viewMode()).href}
-function save(){try{localStorage.setItem('eduvize-pid-config',JSON.stringify({stops:selected,viewMode:viewMode(),segment:segmentState,types:typeBoxes.filter(x=>x.checked).map(x=>x.value),...Object.fromEntries(['minutes','limit','pageSeconds','nearbyKm'].map(k=>[k,$(k).value]))}));return true}catch{return false}}
+function outputUrl(){const url=new URL('./index.html',location.href);url.searchParams.set('stops',selected.join('|'));const checked=typeBoxes.filter(x=>x.checked).map(x=>x.value);url.searchParams.set('types',checked.join(','));for(const key of ['minutes','limit','pageSeconds']){const el=$(key);url.searchParams.set(key,el.value)}url.searchParams.set('viewMode',viewMode());url.searchParams.set('v','20261101-picker-1');if(viewMode()==='nsp'){const segment=window.EduvizeSegmentSelection?.params()||segmentState;for(const [key,value] of Object.entries(segment))url.searchParams.set('segment_'+key,String(value))}return window.EduvizeOutputModes.url(url,viewMode()).href}
+function validatedOutputUrl(){if(!selected.length)throw Error('Vyberte alespoň jednu zastávku.');if(!typeBoxes.some(box=>box.checked))throw Error('Vyberte alespoň jeden druh dopravy.');if(!$('form').reportValidity())throw Error('Zkontrolujte číselné nastavení.');return outputUrl()}
+function save(){segmentState=window.EduvizeSegmentSelection?.params()||segmentState;try{localStorage.setItem('eduvize-pid-config',JSON.stringify({stops:selected,viewMode:viewMode(),segment:segmentState,types:typeBoxes.filter(x=>x.checked).map(x=>x.value),...Object.fromEntries(['minutes','limit','pageSeconds','nearbyKm'].map(k=>[k,$(k).value]))}));return true}catch{return false}}
 let nearbyOrigin=null;const radiusKm=()=>Math.min(10,Math.max(.1,Number($('nearbyKm').value)||1));$('nearbyKm').addEventListener('input',()=>{if(nearbyOrigin)showNearby(...nearbyOrigin)});const weatherApi='https://eduvize-weather.onrender.com';
 const schoolInput=$('search'),schoolResults=$('schoolResults'),nearby=$('nearby');
 let schoolTimer=0,schoolSeq=0,schoolChoiceSeq=0,schoolCatalog=null;
@@ -102,33 +103,18 @@ async function findSchools(){const q=schoolInput.value.trim();schoolResults.repl
 
 schoolInput.addEventListener('input',()=>{clearTimeout(schoolTimer);schoolSeq++;schoolChoiceSeq++;nearbyOrigin=null;schoolResults.replaceChildren();nearby.replaceChildren();renderSuggestions();if(schoolInput.value.trim().length>=3)schoolTimer=setTimeout(findSchools,250)});
 $('search').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(e.isComposing)return;const first=schoolResults.querySelector('button')||$('suggestions').querySelector('button');if(first)first.click()}});
-$('form').addEventListener('submit',e=>{e.preventDefault();try{const url=outputUrl();const stored=save();location.assign(url);message('Výstup byl otevřen.'+(stored?'':' Prohlížeč neumožnil uložit nastavení; je obsažené v odkazu.'))}catch(err){message(err.message,true)}});
-$('copy').onclick=async()=>{try{const url=outputUrl();const stored=save();$('outputLink').value=url;$('outputLink').hidden=false;await navigator.clipboard.writeText(url);message('Odkaz na výstup byl zkopírován.'+(stored?'':' Prohlížeč neumožnil uložit nastavení; je obsažené v odkazu.'))}catch(err){message('Odkaz nelze automaticky zkopírovat. Pokud je zobrazen níže, označte jej a zkopírujte ručně. '+err.message,true)}};
-function scheduleModulePreview(){clearTimeout(moduleTimer);moduleTimer=setTimeout(renderModulePreview,200)}
+$('form').addEventListener('submit',e=>{e.preventDefault();try{const url=validatedOutputUrl();const stored=save();location.assign(url);message('Výstup byl otevřen.'+(stored?'':' Prohlížeč neumožnil uložit nastavení; je obsažené v odkazu.'))}catch(err){message(err.message,true)}});
+$('copy').onclick=async()=>{try{const url=validatedOutputUrl();const stored=save();$('outputLink').value=url;$('outputLink').hidden=false;await navigator.clipboard.writeText(url);message('Odkaz na výstup byl zkopírován.'+(stored?'':' Prohlížeč neumožnil uložit nastavení; je obsažené v odkazu.'))}catch(err){message('Odkaz nelze automaticky zkopírovat. Pokud je zobrazen níže, označte jej a zkopírujte ručně. '+err.message,true)}};
+function scheduleModulePreview(){segmentState=window.EduvizeSegmentSelection?.params()||segmentState;clearTimeout(moduleTimer);moduleTimer=setTimeout(renderModulePreview,200)}
 function previewSettingsValid(){return selected.length>0&&typeBoxes.some(box=>box.checked)&&['minutes','limit','pageSeconds'].every(key=>$(key).checkValidity())}
 function renderModulePreview(){
-const valid=previewSettingsValid();
-$('previewHelp').textContent=valid?'Náhled odpovídá vybraným zastávkám a nastavení odjezdů.':'Pro náhled vyberte alespoň jednu zastávku, druh dopravy a platné číselné nastavení.';
-if(!window.EduvizeNSPPicker||!window.EduvizeNSPLayouts){$('previewHelp').textContent='Výběr modulů se nepodařilo načíst. Obnovte stránku; ostatní nastavení zůstávají dostupná.';return}
-if(!modulePicker){
-modulePicker=window.EduvizeNSPPicker.mount(moduleHost,{initial:segmentState,interactivePreview:true,previewUrl:state=>{
-if(!previewSettingsValid())return 'about:blank';
-const url=new URL(outputUrl());if(viewMode()==='nsp')for(const [key,value] of Object.entries(state))url.searchParams.set('segment_'+key,String(value));url.searchParams.set('preview','1');return url.href;
-},onChange:state=>{segmentState=state;syncModuleMode()}});
-}else modulePicker.set(segmentState);
-segmentState=modulePicker.get();syncModuleMode();
+ $('previewHelp').textContent=previewSettingsValid()?'Náhled odpovídá vybraným zastávkám a nastavení odjezdů.':'Pro zobrazení odjezdů vyberte alespoň jednu zastávku, druh dopravy a platné číselné nastavení.';
+ if(window.EduvizeSegmentSelection){window.EduvizeSegmentSelection.set(segmentState);segmentState=window.EduvizeSegmentSelection.params();}
 }
-function syncModuleMode(){
-if(!modulePicker)return;
-const valid=previewSettingsValid(),web=viewMode()!=='nsp';
-modulePicker.setMode(viewMode()==='kiosk'?'kiosk':web?'web':'nsp');
-moduleHost.querySelector('#ev-preview-wrap').hidden=!valid;
-moduleHost.querySelector('h3').hidden=!valid||web;
-}
-$('outputType').addEventListener('change',renderModulePreview);
+$('viewMode').addEventListener('change',renderModulePreview);
 for(const id of ['minutes','limit','pageSeconds'])$(id).addEventListener('input',scheduleModulePreview);
 for(const box of typeBoxes)box.addEventListener('change',scheduleModulePreview);
-$('saveSettings').onclick=()=>{try{outputUrl();message(save()?'Nastavení bylo uloženo v tomto prohlížeči.':'Prohlížeč nepovolil uložení. Použijte odkaz na výstup.',false)}catch(err){message(err.message,true)}};
+$('saveSettings').onclick=()=>{try{validatedOutputUrl();message(save()?'Nastavení bylo uloženo v tomto prohlížeči.':'Prohlížeč nepovolil uložení. Použijte odkaz na výstup.',false)}catch(err){message(err.message,true)}};
 renderModulePreview();
 // The full stop catalogue is independent of the currently published departures.
 renderSelected();message('Načítám seznam zastávek PID…');
@@ -158,11 +144,13 @@ message('Načteno '+available.length+' zastávek PID. Zadejte alespoň dva znaky
 }catch(err){message('Nepodařilo se načíst seznam zastávek: '+err.message,true);renderSelected()}
 })();
 </script>
+<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261101-picker-1"></script>
+<script>window.EduvizeSegmentSelection?.set(segmentState);</script>
 <script id="eduvize-profile-adapter">
 window.EduvizeProfileAdapter={app:"transport",
 ready:new Promise((resolve,reject)=>{let n=0;const wait=()=>{if(available.length)resolve();else if(n++>300)reject(Error('Nejprve musí být dostupný seznam zastávek.'));else setTimeout(wait,100);};wait();}),
-read:()=>({schemaVersion:1,values:window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','outputType']).read(),stops:[...selected],types:typeBoxes.filter(e=>e.checked).map(e=>e.value),segment:{...segmentState}}),
-apply:async config=>{if(!Array.isArray(config.stops)||!Array.isArray(config.types))throw Error('Neplatné nastavení zastávek.');const missing=config.stops.filter(v=>!available.includes(v));if(missing.length)throw Error('Zastávka již není v katalogu: '+missing.join(', '));window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','outputType']).apply(config.values);selected.splice(0,selected.length,...config.stops);for(const e of typeBoxes)e.checked=config.types.includes(e.value);if(config.segment)segmentState={...config.segment};renderSelected();renderSuggestions();refreshNearbyButtons();renderModulePreview();save();}};
+read:()=>({schemaVersion:1,values:window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).read(),stops:[...selected],types:typeBoxes.filter(e=>e.checked).map(e=>e.value),segment:window.EduvizeSegmentSelection?.params()||{...segmentState}}),
+apply:async config=>{if(!Array.isArray(config.stops)||!Array.isArray(config.types))throw Error('Neplatné nastavení zastávek.');const missing=config.stops.filter(v=>!available.includes(v));if(missing.length)throw Error('Zastávka již není v katalogu: '+missing.join(', '));window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).apply({...config.values,viewMode:config.values?.viewMode||config.values?.outputType||'nsp'});selected.splice(0,selected.length,...config.stops);for(const e of typeBoxes)e.checked=config.types.includes(e.value);if(config.segment)segmentState={...config.segment};renderSelected();renderSuggestions();refreshNearbyButtons();renderModulePreview();save();}};
 window.dispatchEvent(new Event("eduvize-profile-adapter-ready"));
 </script>
 </body></html>
