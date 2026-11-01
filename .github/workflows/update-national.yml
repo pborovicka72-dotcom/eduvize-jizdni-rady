@@ -1,0 +1,46 @@
+name: Aktualizace celostátního GTFS
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/export_national_gtfs.py'
+      - '.github/workflows/update-national.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '43 4 * * *'
+permissions:
+  contents: write
+concurrency:
+  group: national-public-export
+  cancel-in-progress: false
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test calendars and export
+        run: python -m unittest discover -s scripts -p 'test_export*.py' -v
+      - name: Export latest national release
+        run: python scripts/export_national_gtfs.py --output /tmp/national
+      - name: Publish national data without changing PID
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p data/national
+            cp -a /tmp/national/. data/national/
+            git add data/national
+            if git diff --cached --quiet; then break; fi
+            git commit -m "Update national GTFS planned departures"
+            if git push origin HEAD:main; then break; fi
+            if [ "$attempt" -eq 5 ]; then exit 1; fi
+            sleep "$attempt"
+          done
