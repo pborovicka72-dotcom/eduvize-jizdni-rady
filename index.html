@@ -1,6 +1,6 @@
 <!doctype html><html data-kiosk-app="transport" lang="cs"><head><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-modes.js?v=20261031-integrity-1"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Odjezdy</title>
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-tokens.css?v=20261031-integrity-1">
-<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/transport.css?v=20261101-web-delay-column">
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/transport.css?v=20261101-route-insets">
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.css?v=20261031-global-insets-2">
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-header.css?v=20261031-touch-nav-1">
 <script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/segment-profile.js?v=20261031-footnotes-1"></script>
@@ -31,7 +31,7 @@ const limit=boundedNumber(query.get('limit'),25,1,200);
 const pageSeconds=boundedNumber(query.get('pageSeconds'),10,3,120);
 const source=query.get('source')||'pid';
 const selectedTypes=new Set((query.get('types')||'bus,tram,metro,train,ferry,funicular').split(','));
-function transportType(d){const type=Number(d.route_type);if(type===1)return 'metro';if(type===0||type===900)return 'tram';if(type===2||(type>=100&&type<200))return 'train';if(type===3||(type>=700&&type<800))return 'bus';if(type===4||(type>=1000&&type<1100))return 'ferry';if(type===7||(type>=1300&&type<1400))return 'funicular';return 'bus'}
+function transportType(d){const type=Number(d.route_type);if(type===11)return 'bus';if(type===1)return 'metro';if(type===0||type===900)return 'tram';if(type===2||(type>=100&&type<200))return 'train';if(type===3||(type>=700&&type<800))return 'bus';if(type===4||(type>=1000&&type<1100))return 'ferry';if(type===7||(type>=1300&&type<1400))return 'funicular';return 'bus'}
 const zone='Europe/Prague';
 const timeFormat=new Intl.DateTimeFormat('cs-CZ',{timeZone:zone,hour:'2-digit',minute:'2-digit'});
 const dateFormat=new Intl.DateTimeFormat('cs-CZ',{timeZone:zone,weekday:'long',day:'numeric',month:'long',year:'numeric'});
@@ -70,12 +70,13 @@ function routeBadge(d){
   if(type===1){kind='metro';label='metro';badge.classList.add(['A','B','C'].includes(line.toUpperCase())?'metro-'+line.toLowerCase():'unknown');}
   else if(type===0||type===900){kind='tram';label='tramvaj';badge.classList.add('tram');}
   else if(type===2||type>=100&&type<200){kind='train';label='vlak';badge.classList.add('train');}
+  else if(type===11){kind='bus';label='trolejbus';badge.classList.add('trolleybus');}
   else if(type===3||type>=700&&type<800){kind='bus';label='autobus';}
   else if(type===4||type>=1000&&type<1100){kind='ferry';label='přívoz';badge.classList.add('ferry');}
   else if(type===7||type>=1300&&type<1400){kind='funicular';label='lanovka';badge.classList.add('funicular');}
   else{badge.classList.add('unknown');}
   badge.append(makeIcon(kind),textNode('span','route-number',line));
-  badge.setAttribute('aria-label',label+' '+line);
+  badge.setAttribute('aria-label',label+' '+line);badge.title=label+' '+line;
   return badge;
 }
 function buildRow(d){const row=document.createElement('div');row.className='departure';const date=new Date(d.scheduled_at);row.append(textNode('span','time',timeFormat.format(date)),routeBadge(d),textNode('span','destination',tidyName(d.destination||'—')),textNode('span','stop',tidyName(d.stop_name||'—')));const countdown=textNode('span','countdown','—');countdown.dataset.departure=String(Date.parse(window.EduvizeTransportRealtime.actual(d)));if(d.is_canceled){countdown.textContent='—';delete countdown.dataset.departure;row.classList.add('is-canceled')}const delay=textNode('span','delay',window.EduvizeTransportRealtime.label(d));delay.classList.toggle('is-delayed',d.realtime_available&&d.delay_seconds>=60);row.append(countdown,delay);return row}
