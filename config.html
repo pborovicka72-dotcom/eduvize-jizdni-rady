@@ -119,6 +119,7 @@ $('saveSettings').onclick=()=>{try{validatedOutputUrl();message(save()?'Nastaven
 renderModulePreview();
 // Source catalogues are independent; national IDs must never be used for PID realtime.
 let catalogueRequest=0,catalogueSource=null;
+function loadedStops(n){const form=new Intl.PluralRules('cs').select(n);return (form==='one'?'Načtena ':form==='few'?'Načteny ':'Načteno ')+n+' '+(form==='one'?'zastávka':form==='few'?'zastávky':'zastávek');}
 async function loadStopCatalog(source,requested=[]){
 const request=++catalogueRequest;message('Načítám seznam zastávek…');
 const response=await fetch(source==='cz_gtfs'?'./data/national/stops.json':'./data/stops.json');
@@ -128,7 +129,7 @@ if(request!==catalogueRequest)return;catalogueSource=source;
 available.splice(0,available.length,...new Set(full.stops));available.sort((a,b)=>a.localeCompare(b,'cs'));
 stopCoordinates=full.coordinates||{};selected.splice(0,selected.length,...requested.filter(name=>available.includes(name)));
 renderSelected();renderSuggestions();if(nearbyOrigin)showNearby(...nearbyOrigin);renderModulePreview();
-message('Načteno '+available.length+' zastávek · '+(source==='cz_gtfs'?'ČR, plánované časy bez zpoždění. Zdroj: Patrick Zandl, CC BY 4.0.':'PID, včetně živých dat.'));
+message(loadedStops(available.length)+' · '+(source==='cz_gtfs'?'ČR, plánované časy bez zpoždění. Zdroj: Patrick Zandl, CC BY 4.0.':'PID, včetně živých dat.'));
 }
 $('source').value=(params.get('source')||saved.source)==='cz_gtfs'?'cz_gtfs':'pid';
 renderSelected();loadStopCatalog($('source').value,params.has('stops')?(params.get('stops')||'').split('|'):(saved.stops||[])).catch(error=>message(error.message,true));
