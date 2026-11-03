@@ -1,9 +1,9 @@
-<!doctype html><html lang="cs"><head><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-modes.js?v=20261102-interaction-2"></script><meta charset="utf-8"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-account.css?v=1"><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-auth.js?v=20261102-interaction-1"></script><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Nastavení jízdních řádů</title>
+<!doctype html><html lang="cs"><head><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-modes.js?v=20261103-output-controls-1"></script><meta charset="utf-8"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-account.css?v=1"><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-auth.js?v=20261102-interaction-1"></script><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Nastavení jízdních řádů</title>
 <script>document.documentElement.classList.add('ev-theme-pending');setTimeout(()=>document.documentElement.classList.remove('ev-theme-pending'),2500);</script>
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-tokens.css?v=20261031-integrity-1">
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-components.css?v=20261031">
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-shell.css?v=output-actions-20261101">
-<script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=20261102-all-admin-status-9"></script>
+<script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=20261103-output-controls-1"></script>
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.css?v=20261031-controls-gap-56">
 
 <link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.css?v=20261031-identity-gap-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.js?v=2"></script><style>
@@ -135,7 +135,7 @@ $('source').value=(params.get('source')||saved.source)==='cz_gtfs'?'cz_gtfs':'pi
 renderSelected();loadStopCatalog($('source').value,params.has('stops')?(params.get('stops')||'').split('|'):(saved.stops||[])).catch(error=>message(error.message,true));
 $('source').addEventListener('change',async()=>{schoolSeq++;schoolChoiceSeq++;clearTimeout(schoolTimer);schoolResults.replaceChildren();nearby.replaceChildren();nearbyOrigin=null;try{await loadStopCatalog($('source').value,[]);save()}catch(error){message(error.message,true)}});
 </script>
-<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261101-delay-2"></script>
+<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261103-output-controls-1"></script>
 <script>window.EduvizeSegmentSelection?.set(segmentState);</script>
 <script id="eduvize-profile-adapter">
 window.EduvizeProfileAdapter={app:"transport",
