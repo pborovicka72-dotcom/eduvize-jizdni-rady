@@ -116,7 +116,7 @@ function applyTransportLayout(){window.EduvizeTransportLayout.apply(document.bod
 applyTransportLayout();window.addEventListener('resize',applyTransportLayout);document.fonts?.ready.then(repaginate);
 updateClock();load();setInterval(()=>{updateClock();updateCountdowns()},10000);setInterval(load,30000);setInterval(()=>{if(!window.EduvizeOutputModes.isInteractive()&&!showAll&&pages.length>1){pageIndex=(pageIndex+1)%pages.length;render()}},pageSeconds*1000);new ResizeObserver(()=>repaginate()).observe($('viewport'));
 </script>
-<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/segment-display.js?v=20261031-integrity-1"></script><div class="edu-kiosk-style-version" aria-label="Verze stylu kiosku">Odjezdy · styl kiosku v2026.11.01.50</div></body>
+<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/segment-display.js?v=20261103-viewport-1"></script><div class="edu-kiosk-style-version" aria-label="Verze stylu kiosku">Odjezdy · styl kiosku v2026.11.01.50</div></body>
 </html>
 
 
