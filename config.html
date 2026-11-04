@@ -21,9 +21,10 @@
 <main class="edu-admin-page"><header class="edu-page-header"><div class="edu-page-header__identity"><div class="edu-page-header__icon" data-edu-app-icon="transport" aria-hidden="true"></div><div class="edu-page-header__titles"><div class="edu-page-header__eyebrow">Eduvize · Doprava</div><h1 class="edu-page-header__title">Jízdní řády</h1></div></div><p class="edu-page-header__description">Nastavení zobrazovaných odjezdů</p></header>
 <form id="form" class="config-panel edu-admin__card">
 <label class="full">Zdroj jízdních řádů<select id="source"><option value="pid">PID · plánované a živé odjezdy</option><option value="cz_gtfs">Česká republika · plánované odjezdy GTFS</option></select></label>
-<label class="full">Vyhledat školu nebo zastávku<input id="search" enterkeyhint="search" type="search" placeholder="Název školy, obec, adresa nebo zastávka…" autocomplete="off" aria-describedby="searchHelp"></label>
-<p id="searchHelp" class="config-help">Nejprve nabízíme školy z rejstříku MŠMT, poté zastávky vybraného zdroje. Vyhledávání funguje i bez diakritiky.</p>
+<label class="full">Vyhledat školu, adresu nebo zastávku<input id="search" enterkeyhint="search" type="search" placeholder="Název školy, obec, adresa nebo zastávka…" autocomplete="off" aria-describedby="searchHelp"></label>
+<p id="searchHelp" class="config-help">Nabízíme školy z rejstříku MŠMT, adresy z RÚIAN a zastávky vybraného zdroje. Vyhledávání funguje i bez diakritiky.</p>
 <div id="schoolResults" class="edu-choice-list full" aria-live="polite"></div>
+<div id="addressResults" class="edu-choice-list full" aria-live="polite"></div>
 <div id="suggestions" class="edu-choice-list full" aria-live="polite"></div>
 <label class="full">Maximální vzdálenost okolních zastávek (km)<input id="nearbyKm" type="number" min="0.1" max="10" step="0.1" value="1"></label><div id="nearby" class="edu-choice-list full" aria-live="polite"></div>
 <div class="full"><div class="config-intro">Vybrané zastávky</div><div id="selected" class="edu-choice-list" style="margin-top:9px"></div></div>
@@ -77,6 +78,28 @@ function save(){segmentState=window.EduvizeSegmentSelection?.params()||segmentSt
 let nearbyOrigin=null;const radiusKm=()=>Math.min(10,Math.max(.1,Number($('nearbyKm').value)||1));$('nearbyKm').addEventListener('input',()=>{if(nearbyOrigin)showNearby(...nearbyOrigin)});const weatherApi='https://eduvize-weather.onrender.com';
 const schoolInput=$('search'),schoolResults=$('schoolResults'),nearby=$('nearby');
 let schoolTimer=0,schoolSeq=0,schoolChoiceSeq=0,schoolCatalog=null;
+const addressResults=$('addressResults');let addressSeq=0;
+async function findAddresses(){
+ const q=schoolInput.value.trim(),seq=++addressSeq;
+ addressResults.replaceChildren();if(q.length<3)return;
+ addressResults.textContent='Vyhledávám adresy…';
+ try{
+  const response=await fetch(weatherApi+'/api/v1/weather/location-search?mode=address&q='+encodeURIComponent(q),{cache:'no-store',signal:AbortSignal.timeout(60000)});
+  if(!response.ok)throw Error();
+  const data=await response.json();if(seq!==addressSeq)return;
+  addressResults.replaceChildren();
+  const heading=document.createElement('p');heading.className='config-intro';heading.textContent='Adresy a místa';addressResults.append(heading);
+  const items=(data.items||[]).filter(item=>Number.isFinite(Number(item.lat))&&Number.isFinite(Number(item.lon)));
+  if(!items.length){const note=document.createElement('p');note.textContent='Adresa nenalezena. Doplňte obec nebo číslo domu.';addressResults.append(note);return;}
+  for(const item of items){
+   const b=document.createElement('button');b.type='button';b.className='edu-choice';
+   b.textContent=[item.label,item.municipality,item.district?'okres '+item.district:''].filter((v,i,a)=>v&&a.indexOf(v)===i).join(' · ');
+   b.onclick=()=>{schoolSeq++;schoolChoiceSeq++;addressSeq++;clearTimeout(schoolTimer);schoolResults.replaceChildren();addressResults.replaceChildren();addressResults.textContent='Vybraná adresa: '+b.textContent;showNearby(Number(item.lat),Number(item.lon),item.label,'address');};
+   addressResults.append(b);
+  }
+ }catch(error){if(seq===addressSeq)addressResults.textContent='Vyhledávání adres není momentálně dostupné. Školy a zastávky můžete vybírat dál.';}
+}
+
 async function getSchoolCatalog(){if(schoolCatalog)return schoolCatalog;const response=await fetch('./data/schools.json',{cache:'no-store'});if(!response.ok)throw Error('Katalog škol ještě není publikovaný (HTTP '+response.status+')');const items=await response.json();if(!Array.isArray(items)||!items.length)throw Error('Katalog škol je prázdný nebo neplatný');schoolCatalog=items;return items;}
 function distanceKm(a,b,c,d){const rad=Math.PI/180;const x=(c-a)*rad,y=(d-b)*rad;const z=Math.sin(x/2)**2+Math.cos(a*rad)*Math.cos(c*rad)*Math.sin(y/2)**2;return 12742*Math.asin(Math.min(1,Math.sqrt(z)))}
 function showNearby(lat,lon,label,origin='school'){
@@ -91,7 +114,7 @@ if(km<=radius&&Number.isFinite(km))found.push({name,km});
 found.sort((a,b)=>a.km-b.km);
 if(!found.length){nearby.textContent='V okruhu '+radius.toLocaleString('cs')+' km nejsou nalezeny další zastávky vybraného zdroje.';return}
 const title=document.createElement('p');title.className='config-intro';
-title.textContent=origin==='stop'?'Další zastávky v okolí: '+label+' (do '+radius.toLocaleString('cs')+' km)':'Nejbližší zastávky u školy (do '+radius.toLocaleString('cs')+' km)';
+title.textContent=origin==='address'?'Nejbližší zastávky u adresy: '+label+' (do '+radius.toLocaleString('cs')+' km)':origin==='stop'?'Další zastávky v okolí: '+label+' (do '+radius.toLocaleString('cs')+' km)':'Nejbližší zastávky u školy (do '+radius.toLocaleString('cs')+' km)';
 nearby.append(title);
 const rail=found.filter(x=>/^Praha-|^Nádraží /i.test(x.name));
 const others=found.filter(x=>!rail.includes(x)).slice(0,20);
@@ -99,10 +122,10 @@ function section(label,items){if(!items.length)return;const heading=document.cre
 section('Železniční stanice a nádraží',rail);
 section('Ostatní zastávky',others);
 }
-async function chooseSchool(item){const seq=++schoolChoiceSeq;schoolSeq++;clearTimeout(schoolTimer);schoolResults.replaceChildren();nearby.replaceChildren();nearbyOrigin=null;schoolResults.textContent='Načítám polohu školy…';const ruian=String(item.ruian||'');if(!/^\d+$/.test(ruian)){schoolResults.textContent='U této školy chybí kód adresy RÚIAN.';return}try{let point;try{const url='https://ags.cuzk.gov.cz/arcgis/rest/services/RUIAN/MapServer/1/query?where='+encodeURIComponent('kod = '+ruian)+'&outFields=kod&returnGeometry=true&outSR=4326&f=json';const res=await fetch(url);if(!res.ok)throw Error('RÚIAN HTTP '+res.status);const result=await res.json();const geometry=result.features?.[0]?.geometry;if(!geometry)throw Error('Adresa nebyla nalezena');point={lat:geometry.y,lon:geometry.x}}catch(primary){const res=await fetch(weatherApi+'/api/v1/weather/ruian-address?code='+encodeURIComponent(ruian));if(!res.ok)throw primary;point=await res.json()}if(!Number.isFinite(Number(point.lat))||!Number.isFinite(Number(point.lon)))throw Error('Neplatné souřadnice');if(seq!==schoolChoiceSeq)return;showNearby(Number(point.lat),Number(point.lon),item.label+' – '+item.address);schoolResults.textContent='Vybraná škola: '+item.label+' · '+item.address}catch(e){if(seq!==schoolChoiceSeq)return;schoolResults.textContent='Polohu školy nelze načíst: '+e.message}}
-async function findSchools(){const q=schoolInput.value.trim();schoolResults.replaceChildren();nearby.replaceChildren();const seq=++schoolSeq;if(q.length<3)return;schoolResults.textContent='Vyhledávám školy…';try{const all=await getSchoolCatalog();if(seq!==schoolSeq)return;const words=normalize(q).split(/\s+/).filter(Boolean);const items=all.filter(item=>{const hay=normalize(item.label+' '+item.address);return words.every(w=>hay.includes(w))}).slice(0,30);schoolResults.replaceChildren();if(!items.length)return;const heading=document.createElement('p');heading.className='config-intro';heading.textContent='Školy';schoolResults.append(heading);for(const item of items){const b=document.createElement('button');b.type='button';b.className='edu-choice';b.textContent=item.label+' · '+item.address;b.onclick=()=>chooseSchool(item);schoolResults.append(b)}}catch(e){if(seq===schoolSeq)schoolResults.textContent='Školy nejsou momentálně dostupné: '+e.message}}
+async function chooseSchool(item){const seq=++schoolChoiceSeq;schoolSeq++;addressSeq++;addressResults.replaceChildren();clearTimeout(schoolTimer);schoolResults.replaceChildren();nearby.replaceChildren();nearbyOrigin=null;schoolResults.textContent='Načítám polohu školy…';const ruian=String(item.ruian||'');if(!/^\d+$/.test(ruian)){schoolResults.textContent='U této školy chybí kód adresy RÚIAN.';return}try{let point;try{const url='https://ags.cuzk.gov.cz/arcgis/rest/services/RUIAN/MapServer/1/query?where='+encodeURIComponent('kod = '+ruian)+'&outFields=kod&returnGeometry=true&outSR=4326&f=json';const res=await fetch(url);if(!res.ok)throw Error('RÚIAN HTTP '+res.status);const result=await res.json();const geometry=result.features?.[0]?.geometry;if(!geometry)throw Error('Adresa nebyla nalezena');point={lat:geometry.y,lon:geometry.x}}catch(primary){const res=await fetch(weatherApi+'/api/v1/weather/ruian-address?code='+encodeURIComponent(ruian));if(!res.ok)throw primary;point=await res.json()}if(!Number.isFinite(Number(point.lat))||!Number.isFinite(Number(point.lon)))throw Error('Neplatné souřadnice');if(seq!==schoolChoiceSeq)return;showNearby(Number(point.lat),Number(point.lon),item.label+' – '+item.address);schoolResults.textContent='Vybraná škola: '+item.label+' · '+item.address}catch(e){if(seq!==schoolChoiceSeq)return;schoolResults.textContent='Polohu školy nelze načíst: '+e.message}}
+async function findSchools(){const q=schoolInput.value.trim();schoolResults.replaceChildren();nearby.replaceChildren();const seq=++schoolSeq;if(q.length<3)return;void findAddresses();schoolResults.textContent='Vyhledávám školy…';try{const all=await getSchoolCatalog();if(seq!==schoolSeq)return;const words=normalize(q).split(/\s+/).filter(Boolean);const items=all.filter(item=>{const hay=normalize(item.label+' '+item.address);return words.every(w=>hay.includes(w))}).slice(0,30);schoolResults.replaceChildren();if(!items.length)return;const heading=document.createElement('p');heading.className='config-intro';heading.textContent='Školy';schoolResults.append(heading);for(const item of items){const b=document.createElement('button');b.type='button';b.className='edu-choice';b.textContent=item.label+' · '+item.address;b.onclick=()=>chooseSchool(item);schoolResults.append(b)}}catch(e){if(seq===schoolSeq)schoolResults.textContent='Školy nejsou momentálně dostupné: '+e.message}}
 
-schoolInput.addEventListener('input',()=>{clearTimeout(schoolTimer);schoolSeq++;schoolChoiceSeq++;nearbyOrigin=null;schoolResults.replaceChildren();nearby.replaceChildren();renderSuggestions();if(schoolInput.value.trim().length>=3)schoolTimer=setTimeout(findSchools,250)});
+schoolInput.addEventListener('input',()=>{clearTimeout(schoolTimer);schoolSeq++;schoolChoiceSeq++;addressSeq++;addressResults.replaceChildren();nearbyOrigin=null;schoolResults.replaceChildren();nearby.replaceChildren();renderSuggestions();if(schoolInput.value.trim().length>=3)schoolTimer=setTimeout(findSchools,250)});
 $('search').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(e.isComposing)return;const first=schoolResults.querySelector('button')||$('suggestions').querySelector('button');if(first)first.click()}});
 $('form').addEventListener('submit',e=>{e.preventDefault();try{const url=validatedOutputUrl();const stored=save();location.assign(url);message('Výstup byl otevřen.'+(stored?'':' Prohlížeč neumožnil uložit nastavení; je obsažené v odkazu.'))}catch(err){message(err.message,true)}});
 $('copy').onclick=async()=>{try{const url=validatedOutputUrl();const stored=save();$('outputLink').value=url;$('outputLink').hidden=false;await navigator.clipboard.writeText(url);message('Odkaz na výstup byl zkopírován.'+(stored?'':' Prohlížeč neumožnil uložit nastavení; je obsažené v odkazu.'))}catch(err){message('Odkaz nelze automaticky zkopírovat. Pokud je zobrazen níže, označte jej a zkopírujte ručně. '+err.message,true)}};
@@ -133,7 +156,7 @@ message(loadedStops(available.length)+' · '+(source==='cz_gtfs'?'ČR, plánovan
 }
 $('source').value=(params.get('source')||saved.source)==='cz_gtfs'?'cz_gtfs':'pid';
 renderSelected();loadStopCatalog($('source').value,params.has('stops')?(params.get('stops')||'').split('|'):(saved.stops||[])).catch(error=>message(error.message,true));
-$('source').addEventListener('change',async()=>{schoolSeq++;schoolChoiceSeq++;clearTimeout(schoolTimer);schoolResults.replaceChildren();nearby.replaceChildren();nearbyOrigin=null;try{await loadStopCatalog($('source').value,[]);save()}catch(error){message(error.message,true)}});
+$('source').addEventListener('change',async()=>{schoolSeq++;schoolChoiceSeq++;addressSeq++;addressResults.replaceChildren();clearTimeout(schoolTimer);schoolResults.replaceChildren();nearby.replaceChildren();nearbyOrigin=null;try{await loadStopCatalog($('source').value,[]);save()}catch(error){message(error.message,true)}});
 </script>
 <script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261103-output-controls-1"></script>
 <script>window.EduvizeSegmentSelection?.set(segmentState);</script>
