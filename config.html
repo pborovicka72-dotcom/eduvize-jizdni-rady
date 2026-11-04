@@ -1,12 +1,30 @@
-<!doctype html><html lang="cs"><head><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-navigation.js?v=20261104-output-tabs-1"></script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-modes.js?v=20261103-output-controls-1"></script><meta charset="utf-8"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-account.css?v=1"><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-auth.js?v=20261104-single-tab-2"></script><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Nastavení jízdních řádů</title>
+<!doctype html><html lang="cs"><head><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-navigation.js?v=20261104-design-audit-1"></script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-modes.js?v=20261104-design-audit-1"></script><meta charset="utf-8"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-account.css?v=20261104-design-audit-1"><script data-edu-theme-first-paint="20261104-design-audit-1">/* Apply only the selected school's cached theme before painting.
+   A missing cache uses the shared CSS baseline immediately, never a blank page. */
+(function(){
+ var key='eduvize-active-theme-v1', map={background:'bg',text:'text',surface:'surface',muted:'muted',primary:'primary',primaryText:'primary-text',secondary:'secondary',secondaryText:'secondary-text',accent:'accent',border:'border'};
+ try{
+  if(document.documentElement.dataset.eduTheme==='standard')return;
+  var profile=new URL(location.href).searchParams.get('edu-profile')||window.EduvizeAdminAuth?.status().profileId||localStorage.getItem('eduvize-profile-selection-v1')||'';
+  profile=/^[a-f0-9]{32}$/.test(profile)?profile:'';
+  var theme=JSON.parse(localStorage.getItem(key+':'+(profile||'global'))||'null');
+  if(!theme?.colors)return;
+  var style=document.documentElement.style;
+  for(var name in map){var value=theme.colors[name];if(/^#[0-9a-f]{6}$/i.test(value||''))style.setProperty('--ev-'+map[name],value);}
+  for(var item of [['controls','heightPx','control-height'],['controls','radiusPx','control-radius'],['cards','radiusPx','card-radius']]){
+   var value=theme[item[0]]?.[item[1]];if(Number.isFinite(value))style.setProperty('--ev-'+item[2],value+'px');
+  }
+  var radius=theme.icons?.radiusPx;style.setProperty('--ev-icon-radius',(Number.isFinite(radius)?Math.max(0,Math.min(24,radius)):10)+'px');
+ }catch(_){}
+})();
+</script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-auth.js?v=20261104-design-audit-1"></script><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Nastavení jízdních řádů</title>
 <script>document.documentElement.classList.add('ev-theme-pending');setTimeout(()=>document.documentElement.classList.remove('ev-theme-pending'),2500);</script>
-<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-tokens.css?v=20261031-integrity-1">
-<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-components.css?v=20261031">
-<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-shell.css?v=output-actions-20261101">
-<script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=20261103-output-controls-1"></script>
-<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.css?v=20261031-controls-gap-56">
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-tokens.css?v=20261104-design-audit-1">
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-components.css?v=20261104-design-audit-1">
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-shell.css?v=20261104-design-audit-1">
+<script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=20261104-design-audit-1"></script>
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.css?v=20261104-design-audit-1">
 
-<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.css?v=20261031-identity-gap-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.js?v=2"></script><style>
+<link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.css?v=20261104-design-audit-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.js?v=20261104-design-audit-1"></script><style>
 /* Application layout; shared components and active-theme.js own presentation. */
 .config-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:start}
 .ev-admin{background:var(--ev-bg,var(--edu-admin-bg))}.full,.config-panel>.config-help{grid-column:1/-1}.config-panel label{min-width:0}
@@ -17,7 +35,7 @@
 .error{font-weight:700}
 @media(max-width:850px){.config-panel{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:470px){.config-panel{grid-template-columns:1fr}}
-</style><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/choice-list.css?v=1"><link rel="icon" type="image/svg+xml" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/assets/eduvize-favicon.svg?v=20261031-unified-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-header.js?v=6"></script></head><body class="ev-admin">
+</style><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/choice-list.css?v=20261104-design-audit-1"><link rel="icon" type="image/svg+xml" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/assets/eduvize-favicon.svg?v=20261031-unified-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-header.js?v=20261104-design-audit-1"></script><link rel="preconnect" href="https://pborovicka72-dotcom.github.io"><link rel="preconnect" href="https://eduvize-design-system-api.onrender.com" crossorigin></head><body class="ev-admin">
 <main class="edu-admin-page"><header class="edu-page-header"><div class="edu-page-header__identity"><div class="edu-page-header__icon" data-edu-app-icon="transport" aria-hidden="true"></div><div class="edu-page-header__titles"><div class="edu-page-header__eyebrow">Eduvize · Doprava</div><h1 class="edu-page-header__title">Jízdní řády</h1></div></div><p class="edu-page-header__description">Nastavení zobrazovaných odjezdů</p></header>
 <form id="form" class="config-panel edu-admin__card">
 <label class="full">Zdroj jízdních řádů<select id="source"><option value="pid">PID · plánované a živé odjezdy</option><option value="cz_gtfs">Česká republika · plánované odjezdy GTFS</option></select></label>
@@ -44,7 +62,7 @@
 <textarea id="outputLink" readonly hidden aria-label="Odkaz na výstup"></textarea>
 <p class="config-help">Nastavení zastávek i vybraného modulu se přenáší v odkazu. Zpoždění a očekávaný čas se doplní ze živých dat PID, jsou-li připojena. Jinak se zobrazí plánovaný jízdní řád.</p>
 </section></main>
-<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=1"></script>
+<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=20261104-design-audit-1"></script>
 
 <script>
 
@@ -161,7 +179,7 @@ $('source').value=(params.get('source')||saved.source)==='cz_gtfs'?'cz_gtfs':'pi
 renderSelected();loadStopCatalog($('source').value,params.has('stops')?(params.get('stops')||'').split('|'):(saved.stops||[])).catch(error=>message(error.message,true));
 $('source').addEventListener('change',async()=>{schoolSeq++;schoolChoiceSeq++;addressSeq++;addressResults.replaceChildren();clearTimeout(schoolTimer);schoolResults.replaceChildren();nearby.replaceChildren();nearbyOrigin=null;try{await loadStopCatalog($('source').value,[]);save()}catch(error){message(error.message,true)}});
 </script>
-<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261103-output-controls-1"></script>
+<script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261104-design-audit-1"></script>
 <script>window.EduvizeSegmentSelection?.set(segmentState);</script>
 <script id="eduvize-profile-adapter">
 window.EduvizeProfileAdapter={app:"transport",
