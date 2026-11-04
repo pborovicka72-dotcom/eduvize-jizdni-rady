@@ -52,6 +52,9 @@
 const $=id=>document.getElementById(id),selected=[],available=[];
 const normalize=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('cs').trim();
 const params=new URLSearchParams(location.search);
+// A delayed cloud restore must not replace choices already being edited.
+let userEditRevision=0;
+for(const event of ['input','change'])$('form').addEventListener(event,()=>{userEditRevision++;});
 let saved={};try{const value=JSON.parse(localStorage.getItem('eduvize-pid-config')||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))saved=value}catch{}
 let stopCoordinates={};
 const types=['bus','tram','metro','train','ferry','funicular'];
@@ -143,12 +146,12 @@ renderModulePreview();
 // Source catalogues are independent; national IDs must never be used for PID realtime.
 let catalogueRequest=0,catalogueSource=null;
 function loadedStops(n){const form=new Intl.PluralRules('cs').select(n);return (form==='one'?'Načtena ':form==='few'?'Načteny ':'Načteno ')+n+' '+(form==='one'?'zastávka':form==='few'?'zastávky':'zastávek');}
-async function loadStopCatalog(source,requested=[]){
+async function loadStopCatalog(source,requested=[],isCurrent=()=>true){
 const request=++catalogueRequest;message('Načítám seznam zastávek…');
 const response=await fetch(source==='cz_gtfs'?'./data/national/stops.json':'./data/stops.json');
 if(!response.ok)throw Error('Katalog zastávek není dostupný (HTTP '+response.status+')');
 const full=await response.json();if(!Array.isArray(full.stops)||!full.stops.length)throw Error('Prázdný katalog zastávek');
-if(request!==catalogueRequest)return;catalogueSource=source;
+if(request!==catalogueRequest||!isCurrent())return;catalogueSource=source;
 available.splice(0,available.length,...new Set(full.stops));available.sort((a,b)=>a.localeCompare(b,'cs'));
 stopCoordinates=full.coordinates||{};selected.splice(0,selected.length,...requested.filter(name=>available.includes(name)));
 renderSelected();renderSuggestions();if(nearbyOrigin)showNearby(...nearbyOrigin);renderModulePreview();
@@ -164,7 +167,7 @@ $('source').addEventListener('change',async()=>{schoolSeq++;schoolChoiceSeq++;ad
 window.EduvizeProfileAdapter={app:"transport",
 ready:new Promise((resolve,reject)=>{let n=0;const wait=()=>{if(available.length)resolve();else if(n++>300)reject(Error('Nejprve musí být dostupný seznam zastávek.'));else setTimeout(wait,100);};wait();}),
 read:()=>({schemaVersion:1,source:$('source').value,values:window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).read(),stops:[...selected],types:typeBoxes.filter(e=>e.checked).map(e=>e.value),segment:window.EduvizeSegmentSelection?.params()||{...segmentState}}),
-apply:async config=>{if(!Array.isArray(config.stops)||!Array.isArray(config.types))throw Error('Neplatné nastavení zastávek.');const source=config.source==='cz_gtfs'?'cz_gtfs':'pid';if($('source').value!==source){await loadStopCatalog(source,[]);$('source').value=source}const missing=config.stops.filter(v=>!available.includes(v));if(missing.length)throw Error('Zastávka již není v katalogu: '+missing.join(', '));window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).apply({...config.values,viewMode:config.values?.viewMode||config.values?.outputType||'nsp'});selected.splice(0,selected.length,...config.stops);for(const e of typeBoxes)e.checked=config.types.includes(e.value);if(config.segment)segmentState={...config.segment};renderSelected();renderSuggestions();refreshNearbyButtons();renderModulePreview();save();}};
+apply:async config=>{if(userEditRevision)return;const revision=userEditRevision;if(!Array.isArray(config.stops)||!Array.isArray(config.types))throw Error('Neplatné nastavení zastávek.');const source=config.source==='cz_gtfs'?'cz_gtfs':'pid';if($('source').value!==source){await loadStopCatalog(source,[],()=>revision===userEditRevision);if(revision!==userEditRevision)return;$('source').value=source}if(revision!==userEditRevision)return;const missing=config.stops.filter(v=>!available.includes(v));if(missing.length)throw Error('Zastávka již není v katalogu: '+missing.join(', '));window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).apply({...config.values,viewMode:config.values?.viewMode||config.values?.outputType||'nsp'});selected.splice(0,selected.length,...config.stops);for(const e of typeBoxes)e.checked=config.types.includes(e.value);if(config.segment)segmentState={...config.segment};renderSelected();renderSuggestions();refreshNearbyButtons();renderModulePreview();save();}};
 window.dispatchEvent(new Event("eduvize-profile-adapter-ready"));
 </script>
 </body></html>
