@@ -18,9 +18,11 @@
 </section></main>
 <script src="./transport-national.js?v=1"></script>
 <script src="./transport-realtime.js?v=20261101-delay-1"></script>
+<script src="./transport-settings.js?v=20261104-kiosk-settings-1"></script>
 <script>
 'use strict';
-const query=new URLSearchParams(location.search);
+const query=window.EduvizeTransportSettings.query(location.search);
+window.EduvizeTransportSettings.watch(location.search,()=>location.reload());
 const kioskOutput=window.EduvizeOutputModes.isInteractive();const showAll=window.EduvizeOutputModes.mode()==='web';
 if(showAll)document.body.classList.add('show-all');
 if(showAll){document.body.classList.add('web-mode');}
