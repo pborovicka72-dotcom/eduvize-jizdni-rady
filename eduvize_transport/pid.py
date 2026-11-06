@@ -5,7 +5,7 @@ import os
 import time
 from datetime import datetime, timezone
 from threading import Lock
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from fastapi import FastAPI, HTTPException, Query
@@ -87,11 +87,34 @@ def departures(stops: str = Query(min_length=2, max_length=2000), minutes: int =
     names = list(dict.fromkeys(stops.split('|')))
     if len(names) > 20 or any(not name.strip() or len(name) > 100 for name in names):
         raise HTTPException(422, 'Vyberte nejvýše 20 zastávek.')
-    items = [item for name in names for item in fetch_stop(name, minutes)]
+    boards = [fetch_board(name, minutes) for name in names]
+    items = [item for rows, stamp in boards for item in rows]
     items.sort(key=lambda item: item['predicted_at'] or item['scheduled_at'])
-    return {'generated_at': datetime.now(timezone.utc).isoformat(), 'source': 'golemio', 'known_stops': names, 'departures': items}
+    observed = min(stamp for rows, stamp in boards)
+    return {'generated_at': observed, 'fetched_at': datetime.now(timezone.utc).isoformat(), 'source': 'golemio', 'known_stops': names, 'departures': items}
 
 def fetch_board(name, minutes):
+    endpoint = os.getenv('EDUVIZE_TRANSPORT_REALTIME_URL')
+    if endpoint:
+        # Only the release-controlled internal service; never a URL from a publication.
+        value = urlsplit(endpoint)
+        if (value.scheme, value.hostname, value.port, value.path) != ('http', 'transit', 8000, '/api/v1/pid/departures') or value.username or value.password or value.query or value.fragment:
+            raise HTTPException(503, 'Interní zdroj PID není správně nakonfigurován.')
+        try:
+            request = Request(endpoint + '?' + urlencode({'stops': name, 'minutes': minutes}), headers={'Accept': 'application/json'})
+            with urlopen(request, timeout=5) as response:
+                data = json.loads(response.read(4_000_001))
+            observed = timestamp(data.get('generated_at'))
+            rows = data.get('departures')
+            if data.get('source') != 'golemio' or data.get('known_stops') != [name] or observed is None or not isinstance(rows, list) or any(not isinstance(row, dict) or row.get('stop_name') != name for row in rows):
+                raise ValueError('Invalid internal board')
+            return rows, observed.isoformat()
+        except HTTPError as error:
+            raise HTTPException(403 if error.code in (401, 403) else 502, 'Interní zdroj PID není dostupný.') from None
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(502, 'Interní zdroj PID není dostupný.') from None
     rows = fetch_stop(name, minutes)
     with _lock:
         observed = _cache[(name, minutes)][2]
