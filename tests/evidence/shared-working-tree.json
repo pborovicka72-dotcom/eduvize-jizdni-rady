@@ -1,0 +1,20 @@
+{
+  "status": "local-working-tree-evidence-not-release",
+  "coreHead": "deba84f60adbbb8035d48c71de84502dd6fbdf3c",
+  "stylesHead": "a9220d118143e12584f7ff726f24eacb7720449b",
+  "containsUncommittedSharedChanges": true,
+  "sha256": {
+    "core": {
+      "eduvize_admin/output_registry.py": "5373310fda46711627e884fddffc74265426c4493263a87a049173e24bf456fb",
+      "eduvize_admin/output_api.py": "e07bc9655d2f66bb0919cb42ac03339cbfc97cec53e734161a517f4cead024a0",
+      "eduvize_admin/output_schemas.py": "582484b88927d06783330f9c5a40393fba9211152c88b76d47841488cfe89189",
+      "tests/test_output_api.py": "4c88fb49c81b37c9f2af354fc19ea18c7a757900e824e36b5f82377048091de8"
+    },
+    "styles": {
+      "design-system/output-client.js": "297c5050e809e5934302924cca46876388f47d1f17562f39ea6ee16715b425b4",
+      "design-system/output-runtime.js": "2514514edbdc69dd62f4abe2cdcf02020a643fbf4778def3f21f3f23dc271637",
+      "design-system/segment-profile.js": "928a7c00270c57243a1ae816627399823ae6d2cb4b12b06623e9d56f2654dbae",
+      "design-system/nsp-geometry.js": "50d366ed27027fb0e4991ed6432fc750f80b22aeca803ac2b4c57b8f7bb598fd"
+    }
+  }
+}

@@ -1,0 +1,60 @@
+name: Transport – společný output API (připnuté zdroje)
+on:
+  workflow_dispatch:
+    inputs:
+      core_sha:
+        description: Schválený úplný SHA eduvize-admin
+        required: true
+        type: string
+      styles_sha:
+        description: Schválený úplný SHA eduvize-styly
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate immutable dependency references
+        env:
+          CORE_SHA: ${{ inputs.core_sha }}
+          STYLES_SHA: ${{ inputs.styles_sha }}
+        run: |
+          [[ "$CORE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$STYLES_SHA" =~ ^[a-f0-9]{40}$ ]]
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: pborovicka72-dotcom/eduvize-admin
+          ref: ${{ inputs.core_sha }}
+          path: .test-dependencies/core
+      - uses: actions/checkout@v4
+        with:
+          repository: pborovicka72-dotcom/eduvize-styly
+          ref: ${{ inputs.styles_sha }}
+          path: .test-dependencies/styles
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r .test-dependencies/core/requirements.txt
+      - name: Real registry and transport adapter tests
+        env:
+          PYTHONPATH: .test-dependencies/core:.
+          EDUVIZE_OUTPUT_CORE: .test-dependencies/core
+        run: python -m unittest discover -s tests -p test_output_adapter.py -v
+      - run: npm install --no-save --package-lock=false playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - name: Published renderer and administration browser checks
+        env:
+          EDUVIZE_OUTPUT_STYLES: .test-dependencies/styles
+        run: |
+          node tests/e2e/published-output.cjs > published-browser-evidence.json
+          node tests/e2e/publication-actions.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: transport-output-browser-evidence
+          path: published-browser-evidence.json

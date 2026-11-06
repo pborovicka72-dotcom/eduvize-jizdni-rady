@@ -8,4 +8,4 @@
 - Nasazujte stejné obrazy a statické soubory ověřené na testu; při publikaci nic znovu nesestavujte. Databázové změny musí být zpětně kompatibilní; destruktivní migrace vyžadují samostatný schválený plán.
 - Provozní postup vlastní `eduvize-admin/deployment/README.md`. Vývojové odkazy nemusí být zachované. Produkce i test musí být nezávislé na Renderu podle ../EDUVIZE-OUTPUT-CONTRACT.md; nové funkce publikujte pouze schvalovaným procesem.
 
-- Společné API určuje ../EDUVIZE-OUTPUT-API-V1.md. Registr/resolver vlastní eduvize-admin, klient/generátor eduvize-styly; jízdní řády nesmí zavést vlastní alternativu. Geometry a theme schéma jsou otevřenými závislostmi do předání společných fixtures.
+- Společné API určuje ../EDUVIZE-OUTPUT-API-V1.md. Registr/resolver vlastní eduvize-admin, klient/generátor eduvize-styly; jízdní řády nesmí zavést vlastní alternativu. Používejte aktuální společná strojová schémata geometry/theme a fixtures; pro CI a test vydání připněte finální immutable SHA společného backendu/klienta.
