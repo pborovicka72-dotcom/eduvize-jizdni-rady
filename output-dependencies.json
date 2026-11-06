@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "core": {
+    "repository": "pborovicka72-dotcom/eduvize-admin",
+    "sha": "2f1f4786425698bea33935c85e901e5628a36995"
+  },
+  "styles": {
+    "repository": "pborovicka72-dotcom/eduvize-styly",
+    "sha": "72a19387158ca63dc7a819438a5e94d4f3462936"
+  },
+  "source": "Reviewed server candidate 99910fafcf5576b962bc, 2026-11-06"
+}

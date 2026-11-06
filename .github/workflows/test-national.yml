@@ -12,7 +12,7 @@ permissions:
   contents: read
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,5 +21,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: node --test tests/national-reader.test.cjs
+      - run: node --test tests/*.cjs tests/*.mjs
       - run: python -m unittest discover -s scripts -p 'test_export*.py' -v
+
+      - run: pip install -r realtime/requirements.txt
+      - run: python -m unittest discover -s realtime -p "test_*.py" -v
+
+      - run: npm install --no-save --package-lock=false playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/e2e/source-network.cjs

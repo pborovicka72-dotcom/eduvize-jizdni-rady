@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+
+.test-dependencies/
+*.egg-info/
+build/
+dist/

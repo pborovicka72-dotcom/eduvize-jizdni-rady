@@ -1,0 +1,719 @@
+{
+  "passed": 45,
+  "cases": [
+    {
+      "presentation": {
+        "mode": "web",
+        "geometry": null,
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 1,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 2,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 2,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 2,
+          "segmentId": 3
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 3,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 3,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 4,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 4,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 4,
+          "segmentId": 3
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 5,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 5,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 5,
+          "segmentId": 3
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 5,
+          "segmentId": 4
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 6,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 6,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 6,
+          "segmentId": 3
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 6,
+          "segmentId": 4
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 7,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 7,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 7,
+          "segmentId": 3
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 8,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "layoutId": 8,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 1,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 2,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 2,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 3,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 3,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 3,
+          "segmentId": 3
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 3,
+          "segmentId": 4
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 4,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 4,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 4,
+          "segmentId": 3
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 5,
+          "segmentId": 1
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 5,
+          "segmentId": 2
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 5,
+          "segmentId": 3
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "nsp",
+        "geometry": {
+          "registryId": "nsp-4k",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "layoutId": 5,
+          "segmentId": 4
+        },
+        "interaction": "display",
+        "kioskLayout": null
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "kiosk",
+        "geometry": {
+          "registryId": "kiosk-viewport",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "width": 1920,
+          "height": 1080
+        },
+        "interaction": "display",
+        "kioskLayout": "menu"
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "kiosk",
+        "geometry": {
+          "registryId": "kiosk-viewport",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "width": 1920,
+          "height": 1080
+        },
+        "interaction": "interactive",
+        "kioskLayout": "menu"
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "kiosk",
+        "geometry": {
+          "registryId": "kiosk-viewport",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "width": 1920,
+          "height": 1080
+        },
+        "interaction": "display",
+        "kioskLayout": "tiles"
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "kiosk",
+        "geometry": {
+          "registryId": "kiosk-viewport",
+          "registryVersion": 1,
+          "orientation": "landscape",
+          "width": 1920,
+          "height": 1080
+        },
+        "interaction": "interactive",
+        "kioskLayout": "tiles"
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "kiosk",
+        "geometry": {
+          "registryId": "kiosk-viewport",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "width": 1080,
+          "height": 1920
+        },
+        "interaction": "display",
+        "kioskLayout": "menu"
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "kiosk",
+        "geometry": {
+          "registryId": "kiosk-viewport",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "width": 1080,
+          "height": 1920
+        },
+        "interaction": "interactive",
+        "kioskLayout": "menu"
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "kiosk",
+        "geometry": {
+          "registryId": "kiosk-viewport",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "width": 1080,
+          "height": 1920
+        },
+        "interaction": "display",
+        "kioskLayout": "tiles"
+      },
+      "passed": true,
+      "requests": 14
+    },
+    {
+      "presentation": {
+        "mode": "kiosk",
+        "geometry": {
+          "registryId": "kiosk-viewport",
+          "registryVersion": 1,
+          "orientation": "portrait",
+          "width": 1080,
+          "height": 1920
+        },
+        "interaction": "interactive",
+        "kioskLayout": "tiles"
+      },
+      "passed": true,
+      "requests": 14
+    }
+  ]
+}

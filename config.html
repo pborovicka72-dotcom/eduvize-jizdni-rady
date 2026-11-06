@@ -38,7 +38,7 @@
 </style><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/choice-list.css?v=20261104-design-audit-1"><link rel="icon" type="image/svg+xml" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/assets/eduvize-favicon.svg?v=20261031-unified-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-header.js?v=20261104-design-audit-1"></script><link rel="preconnect" href="https://pborovicka72-dotcom.github.io"><link rel="preconnect" href="https://eduvize-design-system-api.onrender.com" crossorigin></head><body class="ev-admin">
 <main class="edu-admin-page"><header class="edu-page-header"><div class="edu-page-header__identity"><div class="edu-page-header__icon" data-edu-app-icon="transport" aria-hidden="true"></div><div class="edu-page-header__titles"><div class="edu-page-header__eyebrow">Eduvize · Doprava</div><h1 class="edu-page-header__title">Jízdní řády</h1></div></div><p class="edu-page-header__description">Nastavení zobrazovaných odjezdů</p></header>
 <form id="form" class="config-panel edu-admin__card">
-<label class="full">Zdroj jízdních řádů<select id="source"><option value="pid">PID · plánované a živé odjezdy</option><option value="cz_gtfs">Česká republika · plánované odjezdy GTFS</option></select></label>
+<label class="full">Zdroj jízdních řádů<select id="source"><option value="pid">PID · živé odjezdy, ověřená celostátní záloha</option><option value="cz_gtfs">Česká republika · ověřené PID, jinak plánované odjezdy</option></select></label>
 <label class="full">Vyhledat školu, adresu nebo zastávku<input id="search" enterkeyhint="search" type="search" placeholder="Název školy, obec, adresa nebo zastávka…" autocomplete="off" aria-describedby="searchHelp"></label>
 <p id="searchHelp" class="config-help">Nabízíme školy z rejstříku MŠMT, adresy z RÚIAN a zastávky vybraného zdroje. Vyhledávání funguje i bez diakritiky.</p>
 <div id="schoolResults" class="edu-choice-list full" aria-live="polite"></div>
@@ -188,6 +188,13 @@ read:()=>({schemaVersion:1,source:$('source').value,values:window.EduvizeProfile
 apply:async config=>{if(userEditRevision)return;const revision=userEditRevision;if(!Array.isArray(config.stops)||!Array.isArray(config.types))throw Error('Neplatné nastavení zastávek.');const source=config.source==='cz_gtfs'?'cz_gtfs':'pid';if($('source').value!==source){await loadStopCatalog(source,[],()=>revision===userEditRevision);if(revision!==userEditRevision)return;$('source').value=source}if(revision!==userEditRevision)return;const missing=config.stops.filter(v=>!available.includes(v));if(missing.length)throw Error('Zastávka již není v katalogu: '+missing.join(', '));window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).apply({...config.values,viewMode:config.values?.viewMode||config.values?.outputType||'nsp'});selected.splice(0,selected.length,...config.stops);for(const e of typeBoxes)e.checked=config.types.includes(e.value);if(config.segment)segmentState={...config.segment};renderSelected();renderSuggestions();refreshNearbyButtons();renderModulePreview();save();}};
 window.dispatchEvent(new Event("eduvize-profile-adapter-ready"));
 </script>
+<script src="/design-system/output-client.js"></script>
+<script>
+window.EduvizeTransportDraft=()=>{
+ const mode=viewMode(),seg=window.EduvizeSegmentSelection?.params()||segmentState;
+ return {schemaVersion:1,payloadVersion:1,payload:{source:$('source').value,stops:[...selected],types:typeBoxes.filter(x=>x.checked).map(x=>x.value),...Object.fromEntries(['minutes','limit','pageSeconds'].map(k=>[k,Number($(k).value)]))},presentation:{mode,geometry:mode==='nsp'?{registryId:'nsp-4k',registryVersion:1,orientation:seg.orientation,layoutId:Number(seg.style),segmentId:Number(seg.block)}:null,interaction:'display',kioskLayout:null}};
+};
+</script><script src="./publication-admin.js"></script>
 </body></html>
 
 

@@ -1,0 +1,27 @@
+name: Transport internal service boundary
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  service-boundary:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r realtime/requirements.txt httpx==0.28.1
+      - run: python -m unittest discover -s tests -p test_pid_internal.py -v
+      - name: Check immutable integration references
+        run: |
+          python - <<'PYREF'
+          import json,re
+          pins=json.load(open('output-dependencies.json'))
+          assert all(re.fullmatch('[a-f0-9]{40}',pins[k]['sha']) for k in ['core','styles'])
+          print('Full registry/browser integration is run in the private backend repository without exporting its source or adding a public-repository token.')
+          PYREF

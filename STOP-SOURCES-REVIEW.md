@@ -1,0 +1,21 @@
+# Jízdní řády – změna k revizi
+
+PR propojuje ověřené PID zastávky s celostátní zálohou a přidává integraci společného output API v1. Přesná shoda názvu a oboustranná poloha nástupišť do 150 m umožní crossover; nejednoznačné zastávky se nehádají. Prázdná tabule není výpadek a plánovaná data nemají živé zpoždění. Původní stáří zdrojů se zachovává.
+
+Transport dodává vlastní validátor/publish/live hook do společného registru, samostatný publikovaný renderer nad output-runtime/output-client a test-domain ovládání vytvoření/konceptu/publikace/odvolání. Copy/open čtou existující odkaz a nepublikují. Veřejný kontext nepochází z localStorage, query zastávek nebo relace správce. Registry API ani generátor se zde neduplikují.
+
+## Ověřeno lokálně
+
+- 14 původních regresních kontrol (JS reader/routing/settings, normalizace PID a exporty).
+- 10 HTTP testů skutečného společného registry+transport adaptéru nad izolovanou SQLite: publikace, draft, stálý odkaz, cizí škola, revoke, scoped live data, prázdná tabule, odmítnutý zdroj, nejednoznačná poloha, národní fallback a původní observedAt.
+- 45 browser případů skutečného publikovaného rendereru a shared runtime: web, všechny centrální NSP segmenty, kioskové orientace/menu/tiles/display/interactive, publikovaná revize i styl pod stejným ID, cizí localStorage ignorována, revoke vyčistí obsah a zastaví data polling.
+- Browser test administračních akcí se skutečným sdíleným klientem a řízeným HTTP backendem: explicitní create/publish, copy před publikací odmítnuto, copy po publikaci bez mutace/duplicity.
+- 4 původní browser scénáře klientského výběru zdrojů zůstávají samostatným testem.
+
+Ve všech browser případech se povoluje pouze konkrétní test origin; neprokazují síťovou nezávislost nasazeného serveru. Použita výhradně syntetická data a fixture identity. Podrobnosti nasazení, payload, zdroje, hranice důkazů a přesné lokální příkazy: OUTPUT-INTEGRATION.md.
+
+## Zbývající přijímací brány
+
+Serverový kandidát používá aktuální ověřené core/style SHA z output-dependencies.json. Soukromá integrační CI se přesouvá do repozitáře eduvize-admin s jeho vlastním read-only tokenem; veřejnému repozitáři se nepřidává přístup k privátním zdrojům. Lokálně prošlo 15 HTTP/service testů proti těmto přesným společným zdrojům. Je nutné doložit zelenou soukromou CI pro finální transport SHA a nasazený testovací kandidát.
+
+Před nasazením ověřit balení národních gzip dat, interní PID hop bez internetového přístupu administrace, dvě školy, licence, stálé URL/styl/revoke a restart s blokací Renderu. Živé PID E2E vyžaduje samostatný testovací Golemio klíč; bez něj se výsledek nesmí prezentovat jako potvrzení živého poskytovatele. Produkční vydání zůstává zakázané.
