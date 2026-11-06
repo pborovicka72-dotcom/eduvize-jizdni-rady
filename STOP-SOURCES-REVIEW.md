@@ -13,6 +13,14 @@ Veřejná stránka již neaplikuje zastávky ani inline styl z lokální adminis
 - 4 testy normalizace PID a 2 testy exportů.
 - Kontrola syntaxe inline skriptů a git diff --check.
 
+## Browser integration (6. 11. 2026)
+
+Headless Chrome, izolované kontexty s řízenými síťovými fixtures: živá odpověď, výpadek s gzip zálohou, prázdná tabule, nejednoznačná poloha bez zálohy. Každý kontext obsahuje cizí lokální konfiguraci; výsledek ji nepoužije. Síťový allowlist připouští jen localhost. Test ověřuje skutečné klientské moduly a dekompresi, nikoli kompletní UI ani nasazený server. Spuštění: `node tests/e2e/source-network.cjs` s Playwright; volitelně `CHROME_BIN` a `PLAYWRIGHT_MODULE`. CI instaluje izolovaný Chromium.
+
 ## Před schválením vydání
 
 Toto je změna k revizi kódu, nikoliv potvrzení připravenosti produkce. Zbývá živý pilot a E2E matice kontraktu (dvě školy/profily, resolver, režimy a orientace, blokace Renderu na klientu i serveru po vyprázdnění cache a restartu). Same-origin URL sama neprokazuje nezávislost serveru na Renderu. Test používá vlastní Golemio klíč. Existující Render služby se touto změnou neruší. Přenos na test a produkci výhradně podle společného deployment procesu; produkci schvaluje vlastník.
+
+## Společný resolver – aktuální závislosti
+
+Přečtena specifikace ../EDUVIZE-OUTPUT-API-V1.md ze 6. 11. 2026. Kanonická adresa /o/{id} a veřejný snapshot /api/public/v1/outputs/{id} jsou určeny společně. Backend a klient nejsou implementované a nesmějí být vytvořeny tímto aplikačním PR. Finální schéma geometry, stylový endpoint/theme a fixtures dosud chybí. PR proto zůstává draft; nelze potvrdit publikaci, odvolání, dvě školy/profily ani serverovou blokaci Renderu. Národní/Golemio data v browser integration jsou řízené fixtures, nikoli živá ověření poskytovatelů.

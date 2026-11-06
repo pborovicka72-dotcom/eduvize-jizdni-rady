@@ -26,3 +26,7 @@ jobs:
 
       - run: pip install -r realtime/requirements.txt
       - run: python -m unittest discover -s realtime -p "test_*.py" -v
+
+      - run: npm install --no-save --package-lock=false playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/e2e/source-network.cjs
