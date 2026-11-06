@@ -1,7 +1,8 @@
 /* Published renderer: only shared runtime identity and scoped data. No browser config. */
 (function(root){'use strict';
  const $=id=>document.getElementById(id),stage=$('stage'),format=new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague',hour:'2-digit',minute:'2-digit'});
- let snapshot,metrics,rows=[],page=0,poll=null,paging=null,abort=null,stopped=false,generation=0;
+ let snapshot,metrics,rows=[],plannedStops=new Set(),page=0,poll=null,paging=null,abort=null,stopped=false,generation=0;
+ const sourceDate=new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague',day:'numeric',month:'numeric',year:'numeric'});
  const outputId=new URL(location.href).searchParams.get('edu-output');
  
  function stop(){generation++;clearTimeout(poll);clearInterval(paging);abort?.abort();abort=null;poll=null;paging=null;}
@@ -18,7 +19,7 @@
  function renderRows(){
   const count=pageSize(),pages=Math.max(1,Math.ceil(rows.length/count));page=Math.min(page,pages-1);$('rows').replaceChildren();
   for(const row of rows.slice(page*count,(page+1)*count)){
-   const tr=document.createElement('tr');const delay=row.is_canceled?'Odřeknuto':!row.realtime_available||!Number.isFinite(row.delay_seconds)?'Bez údaje':Math.abs(row.delay_seconds)<60?'Včas':(row.delay_seconds>0?'+':'−')+Math.floor(Math.abs(row.delay_seconds)/60)+' min';
+   const tr=document.createElement('tr');const delay=row.is_canceled?'Odřeknuto':plannedStops.has(row.stop_name)?'Plán':!row.realtime_available||!Number.isFinite(row.delay_seconds)?'Bez údaje':Math.abs(row.delay_seconds)<60?'Včas':(row.delay_seconds>0?'+':'−')+Math.floor(Math.abs(row.delay_seconds)/60)+' min';
    for(const value of [format.format(new Date(row.scheduled_at)),row.line,row.destination,row.stop_name,delay]){const td=document.createElement('td');td.textContent=String(value??'—');tr.append(td)}$('rows').append(tr);
   }
   const interactive=snapshot.presentation.interaction==='interactive';$('previous').parentElement.hidden=pages===1||!interactive;$('page').textContent=(page+1)+' / '+pages;$('previous').disabled=page===0;$('next').disabled=page===pages-1;
@@ -28,7 +29,10 @@
    // Use the shared client's configured same-origin path, never a query-selected provider.
    const dataClient=root.EduvizeOutputClient.create({signal:abort.signal});const value=await dataClient.getPublicData(outputId);if(token!==generation||stopped)return;
    if(value.schemaVersion!==1||!Array.isArray(value.data?.departures))throw Error('Neplatná dopravní data');
-   rows=value.data.departures;page=0;renderRows();$('status').textContent=(value.stale?'Starší údaje · ':value.complete?'':'Část zastávek není dostupná · ')+(rows.length?'Aktualizace '+format.format(new Date(value.fetchedAt)):'Žádné odjezdy v nastaveném intervalu.');
+   rows=value.data.departures;plannedStops=new Set(value.data.plannedStops||[]);page=0;renderRows();
+   const observation=new Date(value.observedAt),planned=plannedStops.size>0;
+   const age=planned?'Podklad: '+sourceDate.format(observation):'Načteno '+format.format(observation);
+   $('status').textContent=(value.stale?'Starší údaje · ':'')+(value.complete?'':'Část zastávek není dostupná · ')+(rows.length?(planned?'Plánované odjezdy · ':'')+age:'Žádné odjezdy v nastaveném intervalu. '+age);
   }catch(error){if(token!==generation||stopped)return;if([403,404,410].includes(error.status)){clear(error);return;}rows=[];renderRows();$('status').textContent='Odjezdy dočasně nejsou dostupné.';}
   if(token===generation&&!stopped)poll=setTimeout(()=>tick(token),30000);
  }
