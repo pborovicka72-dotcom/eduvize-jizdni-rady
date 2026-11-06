@@ -188,7 +188,7 @@ read:()=>({schemaVersion:1,source:$('source').value,values:window.EduvizeProfile
 apply:async config=>{if(userEditRevision)return;const revision=userEditRevision;if(!Array.isArray(config.stops)||!Array.isArray(config.types))throw Error('Neplatné nastavení zastávek.');const source=config.source==='cz_gtfs'?'cz_gtfs':'pid';if($('source').value!==source){await loadStopCatalog(source,[],()=>revision===userEditRevision);if(revision!==userEditRevision)return;$('source').value=source}if(revision!==userEditRevision)return;const missing=config.stops.filter(v=>!available.includes(v));if(missing.length)throw Error('Zastávka již není v katalogu: '+missing.join(', '));window.EduvizeProfiles.fields(['minutes','limit','pageSeconds','nearbyKm','viewMode']).apply({...config.values,viewMode:config.values?.viewMode||config.values?.outputType||'nsp'});selected.splice(0,selected.length,...config.stops);for(const e of typeBoxes)e.checked=config.types.includes(e.value);if(config.segment)segmentState={...config.segment};renderSelected();renderSuggestions();refreshNearbyButtons();renderModulePreview();save();}};
 window.dispatchEvent(new Event("eduvize-profile-adapter-ready"));
 </script>
-<script src="/design-system/output-client.js"></script>
+<script src="/eduvize-styly/design-system/output-client.js"></script>
 <script>
 window.EduvizeTransportDraft=()=>{
  const mode=viewMode(),seg=window.EduvizeSegmentSelection?.params()||segmentState;
