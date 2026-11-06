@@ -27,14 +27,24 @@ jobs:
           [[ "$CORE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$STYLES_SHA" =~ ^[a-f0-9]{40}$ ]]
       - uses: actions/checkout@v4
+      - name: Require read-only access to private shared repositories
+        env:
+          SHARED_READ_TOKEN: ${{ secrets.EDUVIZE_OUTPUT_READ_TOKEN }}
+        run: |
+          if [[ -z "$SHARED_READ_TOKEN" ]]; then
+            echo "::error::Configure EDUVIZE_OUTPUT_READ_TOKEN with read-only Contents access to eduvize-admin and eduvize-styly. The default repository token cannot read private dependencies."
+            exit 1
+          fi
       - uses: actions/checkout@v4
         with:
           repository: pborovicka72-dotcom/eduvize-admin
+          token: ${{ secrets.EDUVIZE_OUTPUT_READ_TOKEN }}
           ref: ${{ env.CORE_SHA }}
           path: .test-dependencies/core
       - uses: actions/checkout@v4
         with:
           repository: pborovicka72-dotcom/eduvize-styly
+          token: ${{ secrets.EDUVIZE_OUTPUT_READ_TOKEN }}
           ref: ${{ env.STYLES_SHA }}
           path: .test-dependencies/styles
       - uses: actions/setup-python@v5
