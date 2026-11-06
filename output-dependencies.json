@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "core": {
+    "repository": "pborovicka72-dotcom/eduvize-admin",
+    "sha": "162cd485b4b1150a207a7c1c32344b990c2f9933"
+  },
+  "styles": {
+    "repository": "pborovicka72-dotcom/eduvize-styly",
+    "sha": "9c200dd0b8f8d579e275fc76ad29ec9ccf13735f"
+  },
+  "source": "Coordinated SHARED-OUTPUT-INTEGRATION-PINS.json, 2026-11-06"
+}

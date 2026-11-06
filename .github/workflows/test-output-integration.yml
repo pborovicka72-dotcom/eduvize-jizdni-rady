@@ -1,25 +1,28 @@
 name: Transport – společný output API (připnuté zdroje)
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       core_sha:
         description: Schválený úplný SHA eduvize-admin
-        required: true
+        default: "162cd485b4b1150a207a7c1c32344b990c2f9933"
+        required: false
         type: string
       styles_sha:
         description: Schválený úplný SHA eduvize-styly
-        required: true
+        default: "9c200dd0b8f8d579e275fc76ad29ec9ccf13735f"
+        required: false
         type: string
 permissions:
   contents: read
 jobs:
   integration:
     runs-on: ubuntu-24.04
+    env:
+      CORE_SHA: ${{ inputs.core_sha || '162cd485b4b1150a207a7c1c32344b990c2f9933' }}
+      STYLES_SHA: ${{ inputs.styles_sha || '9c200dd0b8f8d579e275fc76ad29ec9ccf13735f' }}
     steps:
       - name: Validate immutable dependency references
-        env:
-          CORE_SHA: ${{ inputs.core_sha }}
-          STYLES_SHA: ${{ inputs.styles_sha }}
         run: |
           [[ "$CORE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$STYLES_SHA" =~ ^[a-f0-9]{40}$ ]]
@@ -27,12 +30,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: pborovicka72-dotcom/eduvize-admin
-          ref: ${{ inputs.core_sha }}
+          ref: ${{ env.CORE_SHA }}
           path: .test-dependencies/core
       - uses: actions/checkout@v4
         with:
           repository: pborovicka72-dotcom/eduvize-styly
-          ref: ${{ inputs.styles_sha }}
+          ref: ${{ env.STYLES_SHA }}
           path: .test-dependencies/styles
       - uses: actions/setup-python@v5
         with:

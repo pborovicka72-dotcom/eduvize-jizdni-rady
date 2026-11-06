@@ -1,0 +1,35 @@
+{
+  "status": "local-pinned-integration-passed",
+  "sharedPins": {
+    "schemaVersion": 1,
+    "core": {
+      "repository": "pborovicka72-dotcom/eduvize-admin",
+      "sha": "162cd485b4b1150a207a7c1c32344b990c2f9933"
+    },
+    "styles": {
+      "repository": "pborovicka72-dotcom/eduvize-styly",
+      "sha": "9c200dd0b8f8d579e275fc76ad29ec9ccf13735f"
+    },
+    "source": "Coordinated SHARED-OUTPUT-INTEGRATION-PINS.json, 2026-11-06"
+  },
+  "tests": {
+    "realRegistryHTTP": 10,
+    "publishedBrowserCases": 45,
+    "administrationRetryNoDuplicates": true
+  },
+  "liveTransportServerE2E": false,
+  "productionChanged": false,
+  "artifacts": {
+    "core": {
+      "eduvize_admin/output_registry.py": "5373310fda46711627e884fddffc74265426c4493263a87a049173e24bf456fb",
+      "eduvize_admin/output_api.py": "e07bc9655d2f66bb0919cb42ac03339cbfc97cec53e734161a517f4cead024a0",
+      "eduvize_admin/output_schemas.py": "582484b88927d06783330f9c5a40393fba9211152c88b76d47841488cfe89189"
+    },
+    "styles": {
+      "design-system/output-client.js": "297c5050e809e5934302924cca46876388f47d1f17562f39ea6ee16715b425b4",
+      "design-system/output-runtime.js": "2514514edbdc69dd62f4abe2cdcf02020a643fbf4778def3f21f3f23dc271637",
+      "design-system/segment-profile.js": "928a7c00270c57243a1ae816627399823ae6d2cb4b12b06623e9d56f2654dbae",
+      "design-system/nsp-geometry.js": "50d366ed27027fb0e4991ed6432fc750f80b22aeca803ac2b4c57b8f7bb598fd"
+    }
+  }
+}
