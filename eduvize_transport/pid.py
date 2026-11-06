@@ -2,7 +2,9 @@
 import json
 import math
 import os
+import re
 import time
+from pathlib import Path
 from datetime import datetime, timezone
 from threading import Lock
 from urllib.parse import urlencode, urlsplit
@@ -10,6 +12,7 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 app = FastAPI(title='Eduvize PID realtime')
 app.add_middleware(CORSMiddleware, allow_origins=['https://pborovicka72-dotcom.github.io'], allow_methods=['GET'], allow_headers=[])
@@ -81,6 +84,19 @@ def fetch_stop(name, minutes):
 @app.get('/health')
 def health():
     return {'status': 'ok', 'realtime_configured': bool(os.environ.get('GOLEMIO_API_KEY') or os.environ.get('GOLEMIO_TOKEN'))}
+
+@app.get('/api/v1/national/shards/{shard}')
+def national_shard(shard: str):
+    # A public, release-owned timetable shard; arbitrary paths are never accepted.
+    if not re.fullmatch(r'[a-f0-9]{2}\.json\.gz', shard):
+        raise HTTPException(404, 'Soubor jízdního řádu nebyl nalezen.')
+    root = os.getenv('EDUVIZE_TRANSPORT_DATA_DIR')
+    if not root:
+        raise HTTPException(503, 'Dopravní data nejsou nakonfigurována.')
+    path = Path(root) / 'national' / 'shards' / shard
+    if not path.is_file():
+        raise HTTPException(404, 'Soubor jízdního řádu nebyl nalezen.')
+    return FileResponse(path, media_type='application/gzip', headers={'Cache-Control': 'public, max-age=900', 'X-Content-Type-Options': 'nosniff'})
 
 @app.get('/api/v1/pid/departures')
 def departures(stops: str = Query(min_length=2, max_length=2000), minutes: int = Query(60, ge=1, le=720)):
