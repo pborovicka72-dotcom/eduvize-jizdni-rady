@@ -1,10 +1,6 @@
 /* Live data is fetched through our server, never with a browser-visible API key. */
 (function(root){
- let endpointPromise;
- async function endpoint(){
-  if(!endpointPromise)endpointPromise=fetch(new URL('realtime-config.json',location.href),{cache:'no-store'}).then(r=>r.ok?r.json():{}).then(c=>c.endpoint||null).catch(()=>null);
-  return endpointPromise;
- }
+ async function endpoint(){const response=await fetch('./realtime-config.json',{cache:'no-store'});if(!response.ok)throw Error('Chybí konfigurace PID');const config=await response.json();const url=new URL(config.endpoint,location.origin);if(url.origin!==location.origin)throw Error('PID endpoint musí být ve stejném prostředí');return url.href;}
  async function read(stops,minutes){
   const base=await endpoint();if(!base)return null;
   const url=new URL(base);url.searchParams.set('stops',stops.join('|'));url.searchParams.set('minutes',minutes);

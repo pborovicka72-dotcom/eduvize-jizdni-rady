@@ -84,4 +84,4 @@ def departures(stops: str = Query(min_length=2, max_length=2000), minutes: int =
         raise HTTPException(422, 'Vyberte nejvýše 20 zastávek.')
     items = [item for name in names for item in fetch_stop(name, minutes)]
     items.sort(key=lambda item: item['predicted_at'] or item['scheduled_at'])
-    return {'generated_at': datetime.now(timezone.utc).isoformat(), 'source': 'golemio', 'departures': items}
+    return {'generated_at': datetime.now(timezone.utc).isoformat(), 'source': 'golemio', 'known_stops': names, 'departures': items}
