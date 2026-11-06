@@ -65,3 +65,13 @@ class InternalPID(unittest.TestCase):
                 self.assertEqual(response.headers['content-type'], 'application/gzip')
                 self.assertEqual(client.get('/api/v1/national/shards/private.txt').status_code, 404)
                 self.assertEqual(client.get('/api/v1/national/shards/cc.json.gz').status_code, 404)
+
+    def test_cache_eviction_cannot_separate_rows_from_their_observation(self):
+        class ImmediatelyEvicted(dict):
+            def __setitem__(self, key, value):
+                super().__setitem__(key, value)
+                self.clear()
+        with patch.dict('os.environ', EDUVIZE_TRANSPORT_REALTIME_URL='', GOLEMIO_API_KEY='synthetic-test-only'), patch.object(pid, '_cache', ImmediatelyEvicted()), patch.object(pid, 'urlopen', return_value=io.BytesIO(b'{"departures":[]}')):
+            rows, stamp = pid.fetch_board('A', 60)
+        self.assertEqual(rows, [])
+        self.assertIsNotNone(pid.timestamp(stamp))

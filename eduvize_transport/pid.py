@@ -49,12 +49,12 @@ def normalize(payload, name):
             line=str(route.get('short_name') or ''), route_type=route.get('type', 3), destination=trip.get('headsign') or '—'))
     return result
 
-def fetch_stop(name, minutes):
+def _fetch_direct_board(name, minutes):
     key = (name, minutes)
     with _lock:
         cached = _cache.get(key)
         if cached and time.monotonic() - cached[0] < 20:
-            return cached[1]
+            return cached[1], cached[2]
     token = os.environ.get('GOLEMIO_API_KEY') or os.environ.get('GOLEMIO_TOKEN')
     if not token:
         raise HTTPException(503, 'Živá data PID nejsou nakonfigurována.')
@@ -75,11 +75,15 @@ def fetch_stop(name, minutes):
         raise
     except Exception:
         raise HTTPException(502, 'Živá data PID jsou dočasně nedostupná.') from None
+    observed = datetime.now(timezone.utc).isoformat()
     with _lock:
         if len(_cache) >= 512:
             _cache.clear()
-        _cache[key] = (time.monotonic(), result, datetime.now(timezone.utc).isoformat())
-    return result
+        _cache[key] = (time.monotonic(), result, observed)
+    return result, observed
+
+def fetch_stop(name, minutes):
+    return _fetch_direct_board(name, minutes)[0]
 
 @app.get('/health')
 def health():
@@ -118,7 +122,7 @@ def fetch_board(name, minutes):
             raise HTTPException(503, 'Interní zdroj PID není správně nakonfigurován.')
         try:
             request = Request(endpoint + '?' + urlencode({'stops': name, 'minutes': minutes}), headers={'Accept': 'application/json'})
-            with urlopen(request, timeout=5) as response:
+            with urlopen(request, timeout=4) as response:
                 data = json.loads(response.read(4_000_001))
             observed = timestamp(data.get('generated_at'))
             rows = data.get('departures')
@@ -131,7 +135,4 @@ def fetch_board(name, minutes):
             raise
         except Exception:
             raise HTTPException(502, 'Interní zdroj PID není dostupný.') from None
-    rows = fetch_stop(name, minutes)
-    with _lock:
-        observed = _cache[(name, minutes)][2]
-    return rows, observed
+    return _fetch_direct_board(name, minutes)

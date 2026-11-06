@@ -91,7 +91,8 @@ def live(record,request):
             except (OSError,ValueError,KeyError,TypeError):pass
         return name,None,None,False
     # Bounded parallelism keeps multi-stop PID outages within the shared client's deadline.
-    with ThreadPoolExecutor(max_workers=min(8,len(config['stops']))) as pool:
+    # At most two 4-second internal-service waves for the 20-stop payload limit.
+    with ThreadPoolExecutor(max_workers=min(10,len(config['stops']))) as pool:
         results=list(pool.map(read_one,config['stops']))
     for name,items,stamp,is_planned in results:
         if items is None:missing.append(name)
