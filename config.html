@@ -38,7 +38,7 @@
 </style><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/choice-list.css?v=20261104-design-audit-1"><link rel="icon" type="image/svg+xml" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/assets/eduvize-favicon.svg?v=20261031-unified-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-header.js?v=20261104-design-audit-1"></script><link rel="preconnect" href="https://pborovicka72-dotcom.github.io"><link rel="preconnect" href="https://eduvize-design-system-api.onrender.com" crossorigin></head><body class="ev-admin">
 <main class="edu-admin-page"><header class="edu-page-header"><div class="edu-page-header__identity"><div class="edu-page-header__icon" data-edu-app-icon="transport" aria-hidden="true"></div><div class="edu-page-header__titles"><div class="edu-page-header__eyebrow">Eduvize · Doprava</div><h1 class="edu-page-header__title">Jízdní řády</h1></div></div><p class="edu-page-header__description">Nastavení zobrazovaných odjezdů</p></header>
 <form id="form" class="config-panel edu-admin__card">
-<label class="full">Zdroj jízdních řádů<select id="source"><option value="pid">PID · živé odjezdy, ověřená celostátní záloha</option><option value="cz_gtfs">Česká republika · ověřené PID, jinak plánované odjezdy</option></select></label>
+<label class="full">Zdroj jízdních řádů<select id="source"><option value="pid">PID · živé odjezdy, ověřená celostátní záloha</option><option value="cz_gtfs">Česká republika · ověřené PID, jinak plánované odjezdy</option></select></label><p id="sourceStatus" class="config-help full" role="status"></p>
 <label class="full">Vyhledat školu, adresu nebo zastávku<input id="search" enterkeyhint="search" type="search" placeholder="Název školy, obec, adresa nebo zastávka…" autocomplete="off" aria-describedby="searchHelp"></label>
 <p id="searchHelp" class="config-help">Nabízíme školy z rejstříku MŠMT, adresy z RÚIAN a zastávky vybraného zdroje. Vyhledávání funguje i bez diakritiky.</p>
 <div id="schoolResults" class="edu-choice-list full" aria-live="polite"></div>
@@ -60,7 +60,7 @@
 <div class="config-actions edu-output-actions edu-admin__actions"><button class="edu-admin__button" type="submit" form="form">Použít a otevřít výstup</button><button class="edu-admin__button edu-admin__button--secondary" type="button" id="copy">Kopírovat odkaz</button><button class="edu-admin__button edu-admin__button--secondary" type="button" id="saveSettings">Uložit v prohlížeči</button></div>
 <p id="notice" class="config-help" role="status"></p>
 <textarea id="outputLink" readonly hidden aria-label="Odkaz na výstup"></textarea>
-<p class="config-help">Nastavení zastávek i vybraného modulu se přenáší v odkazu. Zpoždění a očekávaný čas se doplní ze živých dat PID, jsou-li připojena. Jinak se zobrazí plánovaný jízdní řád.</p>
+
 </section></main>
 <script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=20261104-design-audit-1"></script>
 
@@ -165,7 +165,7 @@ renderModulePreview();
 let catalogueRequest=0,catalogueSource=null;
 function loadedStops(n){const form=new Intl.PluralRules('cs').select(n);return (form==='one'?'Načtena ':form==='few'?'Načteny ':'Načteno ')+n+' '+(form==='one'?'zastávka':form==='few'?'zastávky':'zastávek');}
 async function loadStopCatalog(source,requested=[],isCurrent=()=>true){
-const request=++catalogueRequest;message('Načítám seznam zastávek…');
+const request=++catalogueRequest;$('sourceStatus').textContent='Načítám seznam zastávek…';
 const response=await fetch(source==='cz_gtfs'?'./data/national/stops.json':'./data/stops.json');
 if(!response.ok)throw Error('Katalog zastávek není dostupný (HTTP '+response.status+')');
 const full=await response.json();if(!Array.isArray(full.stops)||!full.stops.length)throw Error('Prázdný katalog zastávek');
@@ -173,7 +173,7 @@ if(request!==catalogueRequest||!isCurrent())return;catalogueSource=source;
 available.splice(0,available.length,...new Set(full.stops));available.sort((a,b)=>a.localeCompare(b,'cs'));
 stopCoordinates=full.coordinates||{};selected.splice(0,selected.length,...requested.filter(name=>available.includes(name)));
 renderSelected();renderSuggestions();if(nearbyOrigin)showNearby(...nearbyOrigin);renderModulePreview();
-message(loadedStops(available.length)+' · '+(source==='cz_gtfs'?'ČR, plánované časy bez zpoždění. Zdroj: Patrick Zandl, CC BY 4.0.':'PID, včetně živých dat.'));
+$('sourceStatus').textContent=loadedStops(available.length)+' · '+(source==='cz_gtfs'?'ČR, plánované časy bez zpoždění. Zdroj: Patrick Zandl, CC BY 4.0.':'PID, včetně živých dat.');
 }
 $('source').value=(params.get('source')||saved.source)==='cz_gtfs'?'cz_gtfs':'pid';
 renderSelected();loadStopCatalog($('source').value,params.has('stops')?(params.get('stops')||'').split('|'):(saved.stops||[])).catch(error=>message(error.message,true));
