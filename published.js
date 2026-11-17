@@ -17,10 +17,10 @@
  }
  function pageSize(){if(snapshot.presentation.mode==='web')return Math.max(1,rows.length);return Math.max(1,Math.floor((stage.clientHeight-stage.querySelector('header').offsetHeight-stage.querySelector('footer').offsetHeight-90)/Math.max(48,(metrics.text.body||24)*2)));}
  function renderRows(){
-  const count=pageSize(),pages=Math.max(1,Math.ceil(rows.length/count));page=Math.min(page,pages-1);$('rows').replaceChildren();
+  const count=pageSize(),pages=Math.max(1,Math.ceil(rows.length/count));page=Math.min(page,pages-1);$('rows').replaceChildren();const showDelay=rows.some(row=>row.realtime_available&&Number.isFinite(row.delay_seconds));$('delay-heading').hidden=!showDelay;
   for(const row of rows.slice(page*count,(page+1)*count)){
    const tr=document.createElement('tr');const delay=row.is_canceled?'Odřeknuto':plannedStops.has(row.stop_name)?'Plán':!row.realtime_available||!Number.isFinite(row.delay_seconds)?'Bez údaje':Math.abs(row.delay_seconds)<60?'Včas':(row.delay_seconds>0?'+':'−')+Math.floor(Math.abs(row.delay_seconds)/60)+' min';
-   for(const value of [format.format(new Date(row.scheduled_at)),row.line,row.destination,row.stop_name,delay]){const td=document.createElement('td');td.textContent=String(value??'—');tr.append(td)}$('rows').append(tr);
+   for(const value of [format.format(new Date(row.scheduled_at)),row.line,row.destination,row.stop_name,...(showDelay?[row.realtime_available?delay:'']:[])]){const td=document.createElement('td');td.textContent=String(value??'—');tr.append(td)}$('rows').append(tr);
   }
   const interactive=snapshot.presentation.interaction==='interactive';$('previous').parentElement.hidden=pages===1||!interactive;$('page').textContent=(page+1)+' / '+pages;$('previous').disabled=page===0;$('next').disabled=page===pages-1;
  }
