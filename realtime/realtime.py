@@ -9,9 +9,8 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-
 app = FastAPI(title='Eduvize PID realtime')
-app.add_middleware(CORSMiddleware, allow_origins=['https://pborovicka72-dotcom.github.io'], allow_methods=['GET'], allow_headers=[])
+app.add_middleware(CORSMiddleware, allow_origins=['https://pborovicka72-dotcom.github.io', 'https://eduvize-design-system-api.onrender.com', 'https://eduvize-dokumenty-api.onrender.com', 'https://eduvize-admin.onrender.com', 'https://eduvize-weather.onrender.com', 'https://eduvize-aktuality.onrender.com', 'https://eduvize-skolni-systemy.onrender.com', 'https://eduvize-prubeh-dne.onrender.com', 'https://eduvize-jidelnicek.onrender.com', 'https://eduvize-pid-realtime.onrender.com', 'https://skola.eduvize.cz'.replace('https://skola.eduvize.cz', __import__('os').getenv('PUBLIC_BASE_URL', 'https://skola.eduvize.cz'))], allow_methods=['GET'], allow_headers=[])
 _cache = {}
 _lock = Lock()
 
@@ -35,14 +34,11 @@ def normalize(payload, name):
         available = delay.get('is_available') is True
         predicted = timestamp(times.get('predicted')) if available else None
         seconds = delay.get('seconds')
-        if not isinstance(seconds, (float, int)) or isinstance(seconds, bool) or not math.isfinite(seconds):
+        if not isinstance(seconds, (float, int)) or isinstance(seconds, bool) or (not math.isfinite(seconds)):
             seconds = (predicted - scheduled).total_seconds() if predicted else None
         if not available:
             seconds = None
-        result.append(dict(scheduled_at=scheduled.isoformat(), predicted_at=predicted.isoformat() if predicted else None,
-            delay_seconds=seconds, realtime_available=available, is_canceled=trip.get('is_canceled') is True,
-            stop_id=stop.get('id'), stop_name=stops.get(stop.get('id'), name), trip_id=trip.get('id'),
-            line=str(route.get('short_name') or ''), route_type=route.get('type', 3), destination=trip.get('headsign') or '—'))
+        result.append(dict(scheduled_at=scheduled.isoformat(), predicted_at=predicted.isoformat() if predicted else None, delay_seconds=seconds, realtime_available=available, is_canceled=trip.get('is_canceled') is True, stop_id=stop.get('id'), stop_name=stops.get(stop.get('id'), name), trip_id=trip.get('id'), line=str(route.get('short_name') or ''), route_type=route.get('type', 3), destination=trip.get('headsign') or '—'))
     return result
 
 def fetch_stop(name, minutes):
@@ -55,11 +51,10 @@ def fetch_stop(name, minutes):
     if not token:
         raise HTTPException(503, 'Živá data PID nejsou nakonfigurována.')
     query = urlencode(dict(names=name, limit=200, total=200, minutesBefore=30, minutesAfter=minutes, preferredTimezone='Europe/Prague', includeMetroTrains='true'))
-    request = Request('https://api.golemio.cz/v2/pid/departureboards?' + query,
-        headers={'x-access-token': token, 'Accept': 'application/json'})
+    request = Request('https://api.golemio.cz/v2/pid/departureboards?' + query, headers={'x-access-token': token, 'Accept': 'application/json'})
     try:
         with urlopen(request, timeout=12) as response:
-            payload = json.loads(response.read(4_000_001))
+            payload = json.loads(response.read(4000001))
         if not isinstance(payload.get('departures'), list):
             raise ValueError('Invalid departure board')
         result = normalize(payload, name)
@@ -78,9 +73,9 @@ def health():
     return {'status': 'ok', 'realtime_configured': bool(os.environ.get('GOLEMIO_API_KEY') or os.environ.get('GOLEMIO_TOKEN'))}
 
 @app.get('/api/v1/pid/departures')
-def departures(stops: str = Query(min_length=2, max_length=2000), minutes: int = Query(60, ge=1, le=720)):
+def departures(stops: str=Query(min_length=2, max_length=2000), minutes: int=Query(60, ge=1, le=720)):
     names = list(dict.fromkeys(stops.split('|')))
-    if len(names) > 20 or any(not name.strip() or len(name) > 100 for name in names):
+    if len(names) > 20 or any((not name.strip() or len(name) > 100 for name in names)):
         raise HTTPException(422, 'Vyberte nejvýše 20 zastávek.')
     items = [item for name in names for item in fetch_stop(name, minutes)]
     items.sort(key=lambda item: item['predicted_at'] or item['scheduled_at'])

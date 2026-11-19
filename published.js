@@ -5,12 +5,15 @@
  const date=new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague',weekday:'long',day:'numeric',month:'long',year:'numeric'});
  const sourceDate=new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague',day:'numeric',month:'numeric',year:'numeric'});
  const outputId=new URL(location.href).searchParams.get('edu-output');
- let snapshot,metrics,rows=[],plannedStops=new Set(),page=0,poll=null,paging=null,abort=null,stopped=false,generation=0;
+ let snapshot,metrics,rows=[],pageGroups=[[]],plannedStops=new Set(),page=0,poll=null,paging=null,abort=null,stopped=false,generation=0;
+ const loading=$('loading');
+ function reveal(){stage.style.visibility='visible';loading.hidden=true;}
+ function conceal(message){stage.style.visibility='hidden';loading.textContent=message;loading.hidden=false;}
  const text=(className,value)=>{const node=document.createElement('span');node.className=className;node.textContent=String(value??'—');return node;};
  const tidy=value=>String(value||'—').replace(/,\s*/g,', ').replace(/žel\.\s*st\./gi,'žel. st.').replace(/\s+/g,' ').trim();
  function clock(){const now=new Date();$('clock').textContent=time.format(now);$('date').textContent=date.format(now);for(const node of document.querySelectorAll('[data-departure]')){const remaining=Number(node.dataset.departure)-Date.now();node.textContent=remaining<=0?'odjíždí':Math.ceil(remaining/60000)+' min';}}
  function stop(){generation++;clearTimeout(poll);clearInterval(paging);abort?.abort();abort=null;poll=null;paging=null;}
- function clear(error){stopped=true;stop();rows=[];$('rows').replaceChildren();$('selection').textContent='';$('status').textContent=error?.status===410?'Výstup byl odvolán.':'Výstup není dostupný.';$('dot').classList.add('error');$('previous').parentElement.hidden=true;}
+ function clear(error){stopped=true;stop();rows=[];$('rows').replaceChildren();$('selection').textContent='';$('status').textContent=error?.status===410?'Výstup byl odvolán.':'Výstup není dostupný.';$('dot').classList.add('error');$('previous').parentElement.hidden=true;conceal($('status').textContent);}
  function size(p,m){
   const g=m.geometry,fixed=p.mode!=='web',w=g.width||innerWidth,h=g.height||innerHeight;
   document.documentElement.dataset.outputMode=p.mode;
@@ -52,22 +55,30 @@
   if(showDelay){const delay=document.createElement('td');delay.className='delay';delay.textContent=row.is_canceled?'Odřeknuto':plannedStops.has(row.stop_name)?'Plán':!row.realtime_available||!Number.isFinite(row.delay_seconds)?'Bez údaje':Math.abs(row.delay_seconds)<60?'Včas':(row.delay_seconds>0?'+':'−')+Math.floor(Math.abs(row.delay_seconds)/60)+' min';delay.classList.toggle('is-delayed',row.realtime_available&&row.delay_seconds>=60);tr.append(delay);}
   return tr;
  }
- function pageSize(){
-  if(snapshot.presentation.mode==='web')return Math.max(1,rows.length);
-  const available=$('viewport').clientHeight-$('viewport').querySelector('thead').offsetHeight;
-  const font=parseFloat(stage.style.getPropertyValue('--transport-text'))||metrics.text.body||24;
-  return Math.max(1,Math.floor(available/Math.max(48,font*1.65)));
+ function paginate(showDelay){
+  if(snapshot.presentation.mode==='web')return [rows];
+  const viewport=$('viewport'),heading=viewport.querySelector('.table-header');
+  const available=viewport.clientHeight-heading.offsetHeight-parseFloat(getComputedStyle(heading).marginBottom||0);
+  const body=$('rows'),measured=rows.map(row=>{const node=rowNode(row,showDelay);body.append(node);return {row,node};});
+  const groups=[];let current=[],used=0;
+  for(const item of measured){
+   const height=item.node.offsetHeight+parseFloat(getComputedStyle(item.node).marginBottom||0);
+   if(current.length&&used+height>available+0.5){groups.push(current);current=[];used=0;}
+   current.push(item.row);used+=height;
+  }
+  body.replaceChildren();if(current.length)groups.push(current);
+  return groups.length?groups:[[]];
  }
  function renderRows(){
   if(!snapshot)return;
-  const count=pageSize(),pages=Math.max(1,Math.ceil(rows.length/count)),showDelay=rows.some(row=>row.realtime_available&&Number.isFinite(row.delay_seconds));
-  page=Math.min(page,pages-1);document.documentElement.dataset.delayAvailable=String(showDelay);
-  $('delay-heading').hidden=!showDelay;$('rows').replaceChildren();
-  for(const row of rows.slice(page*count,(page+1)*count))$('rows').append(rowNode(row,showDelay));
+  const showDelay=rows.some(row=>row.realtime_available&&Number.isFinite(row.delay_seconds));
+  document.documentElement.dataset.delayAvailable=String(showDelay);$('delay-heading').hidden=!showDelay;
+  $('rows').replaceChildren();pageGroups=paginate(showDelay);page=Math.min(page,pageGroups.length-1);
+  for(const row of pageGroups[page])$('rows').append(rowNode(row,showDelay));
   if(!rows.length){const message=document.createElement('tr');message.className='message';const cell=document.createElement('td');cell.colSpan=showDelay?6:5;cell.textContent='V nastaveném intervalu nejsou odjezdy.';message.append(cell);$('rows').append(message);}
   clock();
-  const interactive=snapshot.presentation.interaction==='interactive';$('previous').parentElement.hidden=pages===1||!interactive;
-  $('page').textContent=(page+1)+' / '+pages;$('previous').disabled=page===0;$('next').disabled=page===pages-1;
+  const interactive=snapshot.presentation.interaction==='interactive';$('previous').parentElement.hidden=pageGroups.length===1||!interactive;
+  $('page').textContent=(page+1)+' / '+pageGroups.length;$('previous').disabled=page===0;$('next').disabled=page===pageGroups.length-1;
  }
  async function tick(token){if(stopped||token!==generation)return;abort=new AbortController();
   try{
@@ -79,7 +90,8 @@
    const age=planned?'Podklad: '+sourceDate.format(observation):'Načteno '+time.format(observation);
    $('status').textContent=(value.stale?'Starší údaje · ':'')+(value.complete?'':'Část zastávek není dostupná · ')+(rows.length?(planned?'Plánované odjezdy · ':'')+age:'Žádné odjezdy v nastaveném intervalu. '+age);
    $('dot').classList.toggle('error',value.stale||!value.complete);
-  }catch(error){if(token!==generation||stopped)return;if([403,404,410].includes(error.status)){clear(error);return;}rows=[];renderRows();$('status').textContent='Odjezdy dočasně nejsou dostupné.';$('dot').classList.add('error');}
+   reveal();
+  }catch(error){if(token!==generation||stopped)return;if([403,404,410].includes(error.status)){clear(error);return;}rows=[];renderRows();$('status').textContent='Odjezdy dočasně nejsou dostupné.';$('dot').classList.add('error');conceal($('status').textContent);}
   if(token===generation&&!stopped)poll=setTimeout(()=>tick(token),30000);
  }
  function resume(){if(stopped||poll!==null||abort)return;tick(generation);}
@@ -89,6 +101,6 @@
  root.EduvizeOutputRuntime.start({appId:'transport',outputId,
   onPresentation:(presentation,m)=>size(presentation,m),
   render:(value,m,{signal})=>{stop();stopped=false;snapshot=value;metrics=m;rows=[];page=0;$('selection').textContent=value.payload.stops.join(' · ');renderRows();signal.addEventListener('abort',stop,{once:true});},
-  onReady:()=>{resume();if(!paging&&snapshot.presentation.interaction==='display')paging=setInterval(()=>{const pages=Math.max(1,Math.ceil(rows.length/pageSize()));page=(page+1)%pages;renderRows()},snapshot.payload.pageSeconds*1000)},
-  onError:()=>{stop();$('status').textContent='Ověření publikace dočasně není dostupné.';$('dot').classList.add('error');},clear});
+  onReady:()=>{resume();if(!paging&&snapshot.presentation.interaction==='display')paging=setInterval(()=>{page=(page+1)%pageGroups.length;renderRows()},snapshot.payload.pageSeconds*1000)},
+  onError:()=>{stop();$('status').textContent='Ověření publikace dočasně není dostupné.';$('dot').classList.add('error');conceal($('status').textContent);},clear});
 })(window);
