@@ -6,15 +6,7 @@ body{margin:0;overflow:hidden}
 #stage .head .edu-header-meta{font-size:var(--edu-header-meta)}
 html[data-kiosk-header=light] #stage .head{background:var(--ev-surface);color:var(--ev-text);border:1px solid var(--ev-border)}
 #stage .body{overflow:hidden}
-table,thead,tbody{display:block;width:100%;border:0;border-spacing:0}
-tr.table-header,tr.departure{display:grid;width:100%}
-th,td{display:block;min-width:0;text-align:left;border:0}
-th{font:inherit;font-size:var(--transport-label,16px);line-height:1.25}
-tr.departure td{padding:0}
-td.route{display:grid}
-tr.message{display:block}
-tr.message td{display:block;padding:var(--transport-pad,16px);font-size:var(--transport-text,24px);color:var(--ev-muted);text-align:center}
-html[data-delay-available=false] .table-header>th:last-child{display:none}
+html[data-delay-available=false] :is(.table-header>span:last-child,.departure .delay){display:none}
 html[data-delay-available=false] :is(.table-header,.departure){grid-template-columns:calc(var(--transport-time)*3.35) calc(var(--transport-route)*4.8) minmax(0,1.65fr) minmax(0,1fr) calc(var(--transport-stop)*4.8)!important}
 html[data-delay-available=false] [data-transport-layout=stacked] :is(.table-header,.departure){grid-template-columns:calc(var(--transport-time)*3.35) calc(var(--transport-route)*4.8) minmax(0,1fr) calc(var(--transport-stop)*4.8)!important}
 html.web-output[data-delay-available=false] :is(.table-header,.departure){grid-template-columns:5em 4.5em minmax(0,1.6fr) minmax(0,1fr) 4.5em!important}
