@@ -4,6 +4,7 @@ body{margin:0;overflow:hidden}
 #stage .head{min-height:var(--edu-header-height);height:var(--edu-header-height);max-height:var(--edu-header-height);padding:var(--edu-header-padding) var(--edu-header-inset)}
 #stage .head .edu-header-title{font-size:var(--edu-header-title)}
 #stage .head .edu-header-meta{font-size:var(--edu-header-meta)}
+html[data-kiosk-header=light] #stage .head{background:var(--ev-surface);color:var(--ev-text);border:1px solid var(--ev-border)}
 #stage .body{overflow:hidden}
 table,thead,tbody{display:block;width:100%;border:0;border-spacing:0}
 tr.table-header,tr.departure{display:grid;width:100%}
