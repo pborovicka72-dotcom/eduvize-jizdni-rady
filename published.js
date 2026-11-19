@@ -14,6 +14,8 @@
  function size(p,m){
   const g=m.geometry,fixed=p.mode!=='web',w=g.width||innerWidth,h=g.height||innerHeight;
   document.documentElement.dataset.outputMode=p.mode;
+  document.documentElement.dataset.kioskHeader=p.mode==='kiosk'&&p.kioskLayout==='menu'?'light':'dark';
+  document.documentElement.classList.toggle('kiosk-output',p.mode==='kiosk');
   document.documentElement.classList.toggle('web-output',!fixed);
   document.body.classList.toggle('web-mode',!fixed);
   stage.dataset.compact=String(fixed&&(g.ratio>=2.7||(w<=1200&&h<=720)));
