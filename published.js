@@ -11,9 +11,13 @@
  function conceal(message){stage.style.visibility='hidden';loading.textContent=message;loading.hidden=false;}
  const text=(className,value)=>{const node=document.createElement('span');node.className=className;node.textContent=String(value??'—');return node;};
  const tidy=value=>String(value||'—').replace(/,\s*/g,', ').replace(/žel\.\s*st\./gi,'žel. st.').replace(/\s+/g,' ').trim();
- function clock(){const now=new Date();$('clock').textContent=time.format(now);$('date').textContent=date.format(now);for(const node of document.querySelectorAll('[data-departure]')){const remaining=Number(node.dataset.departure)-Date.now();node.textContent=remaining<=0?'odjíždí':Math.ceil(remaining/60000)+' min';}}
+ const stopWord=count=>count===1?'zastávka':count>=2&&count<=4?'zastávky':'zastávek';
+ let headerFitFrame=0;
+ function fitHeader(){for(const node of stage.querySelectorAll('.head .edu-header-title,.head .edu-header-meta')){node.style.removeProperty('font-size');let size=parseFloat(getComputedStyle(node).fontSize);for(let attempt=0;attempt<12&&node.clientWidth&&node.scrollWidth>node.clientWidth+1;attempt++){size*=node.clientWidth/node.scrollWidth;node.style.setProperty('font-size',Math.max(1,size-.2)+'px','important');}}}
+ function scheduleHeaderFit(){cancelAnimationFrame(headerFitFrame);headerFitFrame=requestAnimationFrame(fitHeader);}
+ function clock(){const now=new Date();$('clock').textContent=time.format(now);$('date').textContent=date.format(now);for(const node of document.querySelectorAll('[data-departure]')){const remaining=Number(node.dataset.departure)-Date.now();node.textContent=remaining<=0?'odjíždí':Math.ceil(remaining/60000)+' min';}scheduleHeaderFit();}
  function stop(){generation++;clearTimeout(poll);clearInterval(paging);abort?.abort();abort=null;poll=null;paging=null;}
- function clear(error){stopped=true;stop();rows=[];$('rows').replaceChildren();$('selection').textContent='';$('status').textContent=error?.status===410?'Výstup byl odvolán.':'Výstup není dostupný.';$('dot').classList.add('error');$('previous').parentElement.hidden=true;conceal($('status').textContent);}
+ function clear(error){stopped=true;stop();rows=[];$('rows').replaceChildren();$('station').textContent='';$('status').textContent=error?.status===410?'Výstup byl odvolán.':'Výstup není dostupný.';$('dot').classList.add('error');$('previous').parentElement.hidden=true;conceal($('status').textContent);}
  function size(p,m){
   const g=m.geometry,fixed=p.mode!=='web',w=g.width||innerWidth,h=g.height||innerHeight;
   document.documentElement.dataset.outputMode=p.mode;
@@ -26,8 +30,9 @@
   stage.style.transform=fixed?'scale('+Math.min(innerWidth/w,innerHeight/h)+')':'';
   root.EduvizeTransportLayout.apply(stage,{web:!fixed},w,h);
   for(const [key,value] of Object.entries(m.header))stage.style.setProperty('--edu-header-'+key,value+'px');
-  stage.style.setProperty('--edu-header-inset',(m.header.height-m.header.icon)/2+'px');
+  const inset=(m.header.height-m.header.icon)/2;stage.style.setProperty('--edu-header-inset',inset+'px');stage.style.setProperty('--edu-header-gap',inset+'px');
   for(const [key,value] of Object.entries(m.text))stage.style.setProperty('--edu-text-'+key,value+'px');
+  scheduleHeaderFit();
  }
  function routeKind(row){
   const type=Number(row.route_type),line=String(row.line||'—').trim();
@@ -45,24 +50,22 @@
   const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',paths[kind]||paths.bus);svg.append(path);return svg;
  }
  function rowNode(row,showDelay){
-  const tr=document.createElement('tr');tr.className='departure';if(row.is_canceled)tr.classList.add('is-canceled');
-  const departure=new Date(row.scheduled_at);const timeCell=document.createElement('td');timeCell.className='time';timeCell.textContent=time.format(departure);
-  const route=document.createElement('td');route.className='route';const [kind,color]=routeKind(row);if(color)route.classList.add(color);route.append(routeIcon(kind),text('route-number',row.line));
-  const destination=document.createElement('td');destination.className='destination';destination.textContent=tidy(row.destination);
-  const stopName=document.createElement('td');stopName.className='stop';stopName.textContent=tidy(row.stop_name);
-  const count=document.createElement('td');count.className='countdown';if(!row.is_canceled)count.dataset.departure=String(Date.parse(row.predicted_at||row.scheduled_at));
-  tr.append(timeCell,route,destination,stopName,count);
-  if(showDelay){const delay=document.createElement('td');delay.className='delay';delay.textContent=row.is_canceled?'Odřeknuto':plannedStops.has(row.stop_name)?'Plán':!row.realtime_available||!Number.isFinite(row.delay_seconds)?'Bez údaje':Math.abs(row.delay_seconds)<60?'Včas':(row.delay_seconds>0?'+':'−')+Math.floor(Math.abs(row.delay_seconds)/60)+' min';delay.classList.toggle('is-delayed',row.realtime_available&&row.delay_seconds>=60);tr.append(delay);}
-  return tr;
+  const line=document.createElement('div');line.className='departure';if(row.is_canceled)line.classList.add('is-canceled');
+  const departure=new Date(row.scheduled_at),timeCell=text('time',time.format(departure));
+  const route=document.createElement('span');route.className='route';const [kind,color]=routeKind(row);if(color)route.classList.add(color);route.append(routeIcon(kind),text('route-number',row.line));
+  const destination=text('destination',tidy(row.destination)),stopName=text('stop',tidy(row.stop_name));
+  const count=text('countdown','—');if(!row.is_canceled)count.dataset.departure=String(Date.parse(row.predicted_at||row.scheduled_at));
+  line.append(timeCell,route,destination,stopName,count);
+  if(showDelay){const delay=text('delay',row.is_canceled?'Odřeknuto':plannedStops.has(row.stop_name)?'Plán':!row.realtime_available||!Number.isFinite(row.delay_seconds)?'Bez údaje':Math.abs(row.delay_seconds)<60?'Včas':(row.delay_seconds>0?'+':'−')+Math.floor(Math.abs(row.delay_seconds)/60)+' min');delay.classList.toggle('is-delayed',row.realtime_available&&row.delay_seconds>=60);line.append(delay);}
+  return line;
  }
  function paginate(showDelay){
   if(snapshot.presentation.mode==='web')return [rows];
-  const viewport=$('viewport'),heading=viewport.querySelector('.table-header');
-  const available=viewport.clientHeight-heading.offsetHeight-parseFloat(getComputedStyle(heading).marginBottom||0);
+  const available=$('viewport').clientHeight;
   const body=$('rows'),measured=rows.map(row=>{const node=rowNode(row,showDelay);body.append(node);return {row,node};});
   const groups=[];let current=[],used=0;
   for(const item of measured){
-   const height=item.node.offsetHeight+parseFloat(getComputedStyle(item.node).marginBottom||0);
+   const height=item.node.getBoundingClientRect().height+parseFloat(getComputedStyle(item.node).marginBottom||0);
    if(current.length&&used+height>available+0.5){groups.push(current);current=[];used=0;}
    current.push(item.row);used+=height;
   }
@@ -75,7 +78,7 @@
   document.documentElement.dataset.delayAvailable=String(showDelay);$('delay-heading').hidden=!showDelay;
   $('rows').replaceChildren();pageGroups=paginate(showDelay);page=Math.min(page,pageGroups.length-1);
   for(const row of pageGroups[page])$('rows').append(rowNode(row,showDelay));
-  if(!rows.length){const message=document.createElement('tr');message.className='message';const cell=document.createElement('td');cell.colSpan=showDelay?6:5;cell.textContent='V nastaveném intervalu nejsou odjezdy.';message.append(cell);$('rows').append(message);}
+  if(!rows.length){const message=document.createElement('div');message.className='message';message.textContent='V nastaveném intervalu nejsou odjezdy.';$('rows').append(message);}
   clock();
   const interactive=snapshot.presentation.interaction==='interactive';$('previous').parentElement.hidden=pageGroups.length===1||!interactive;
   $('page').textContent=(page+1)+' / '+pageGroups.length;$('previous').disabled=page===0;$('next').disabled=page===pageGroups.length-1;
@@ -97,10 +100,10 @@
  function resume(){if(stopped||poll!==null||abort)return;tick(generation);}
  $('previous').onclick=()=>{page=Math.max(0,page-1);renderRows()};$('next').onclick=()=>{page++;renderRows()};
  root.addEventListener('resize',()=>{if(snapshot){size(snapshot.presentation,metrics);renderRows()}});
- setInterval(clock,10000);clock();
+ setInterval(clock,10000);clock();document.fonts?.ready.then(scheduleHeaderFit);
  root.EduvizeOutputRuntime.start({appId:'transport',outputId,
   onPresentation:(presentation,m)=>size(presentation,m),
-  render:(value,m,{signal})=>{stop();stopped=false;snapshot=value;metrics=m;rows=[];page=0;$('selection').textContent=value.payload.stops.join(' · ');renderRows();signal.addEventListener('abort',stop,{once:true});},
+  render:(value,m,{signal})=>{stop();stopped=false;snapshot=value;metrics=m;rows=[];page=0;const station=$('station'),count=value.payload.stops.length;station.dataset.fullLabel=count+' '+stopWord(count)+' · následujících '+value.payload.minutes+' min';station.textContent=stage.dataset.transportLayout==='stacked'?station.dataset.fullLabel.split(' · ')[0]:station.dataset.fullLabel;renderRows();scheduleHeaderFit();signal.addEventListener('abort',stop,{once:true});},
   onReady:()=>{resume();if(!paging&&snapshot.presentation.interaction==='display')paging=setInterval(()=>{page=(page+1)%pageGroups.length;renderRows()},snapshot.payload.pageSeconds*1000)},
   onError:()=>{stop();$('status').textContent='Ověření publikace dočasně není dostupné.';$('dot').classList.add('error');conceal($('status').textContent);},clear});
 })(window);

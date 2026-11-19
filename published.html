@@ -9,14 +9,14 @@
   <link rel="stylesheet" href="/eduvize-styly/design-system/transport.css">
   <link rel="stylesheet" href="/eduvize-styly/design-system/app-icons.css">
   <link rel="stylesheet" href="/eduvize-styly/design-system/output-header.css">
-  <link rel="stylesheet" href="./published.css?v=20261119-transport-ready-2">
+  <link rel="stylesheet" href="./published.css?v=20261119-transport-preview-parity-r1">
   <script defer src="/eduvize-styly/design-system/output-client.js"></script>
   <script defer src="/eduvize-styly/design-system/segment-profile.js"></script>
   <script defer src="/eduvize-styly/design-system/nsp-geometry.js"></script>
   <script defer src="/eduvize-styly/design-system/transport-layout.js"></script>
   <script defer src="/eduvize-styly/design-system/app-icons.js"></script>
   <script defer src="/eduvize-styly/design-system/output-runtime.js"></script>
-  <script defer src="./published.js?v=20261119-transport-row-fit-r8"></script>
+  <script defer src="./published.js?v=20261119-transport-preview-parity-r2"></script>
   <script src="/_environment.js" defer></script>
 </head>
 <body>
@@ -26,16 +26,14 @@
       <header class="head edu-output-header">
         <div class="identity edu-header-group">
           <span class="edu-app-icon" data-edu-app-icon="transport" aria-hidden="true"></span>
-          <div><h1 class="edu-header-title">Odjezdy</h1><div class="subtitle edu-header-meta" id="selection"></div></div>
+          <div><h1 class="edu-header-title">Odjezdy</h1><div class="subtitle edu-header-meta" id="station"></div></div>
         </div>
         <div class="clock"><div class="clock-time edu-header-title" id="clock">--:--</div><div class="clock-date edu-header-meta" id="date"></div></div>
       </header>
       <div class="body">
+        <div class="table-header"><span>Odjezd</span><span>Linka</span><span class="destination-heading">Směr</span><span class="stop-heading">Zastávka</span><span>Za</span><span id="delay-heading">Zpoždění</span></div>
         <div class="departures-viewport" id="viewport">
-          <table>
-            <thead><tr class="table-header"><th>Odjezd</th><th>Linka</th><th class="destination-heading">Směr</th><th class="stop-heading">Zastávka</th><th>Za</th><th id="delay-heading">Zpoždění</th></tr></thead>
-            <tbody id="rows"><tr class="message"><td>Načítám publikovaný výstup…</td></tr></tbody>
-          </table>
+          <div id="rows"><div class="message">Načítám publikovaný výstup…</div></div>
         </div>
       </div>
       <footer class="footer">
