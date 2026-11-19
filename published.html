@@ -1,3 +1,46 @@
-<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Jízdní řády · Eduvize</title><link rel="stylesheet" href="./published.css">
-<script defer src="/eduvize-styly/design-system/output-client.js"></script><script defer src="/eduvize-styly/design-system/segment-profile.js"></script><script defer src="/eduvize-styly/design-system/nsp-geometry.js"></script><script defer src="/eduvize-styly/design-system/output-runtime.js"></script><script defer src="./published.js"></script></head>
-<body><main id="stage"><header><span aria-hidden="true">↗</span><div><h1>Odjezdy</h1><p id="selection"></p></div></header><div class="table-wrap"><table><thead><tr><th>Odjezd</th><th>Linka</th><th>Směr</th><th>Zastávka</th><th id="delay-heading">Zpoždění</th></tr></thead><tbody id="rows"></tbody></table></div><footer><p id="status" role="status">Načítám publikovaný výstup…</p><nav aria-label="Stránkování"><button id="previous" type="button">Předchozí</button><span id="page"></span><button id="next" type="button">Další</button></nav><small>Plánované časy ČR · Patrick Zandl · CC BY 4.0 / živé údaje PID · Golemio</small></footer></main></body></html>
+<!doctype html>
+<html lang="cs" data-kiosk-app="transport">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Jízdní řády · Eduvize</title>
+  <link rel="stylesheet" href="/eduvize-styly/design-system/admin-tokens.css">
+  <link rel="stylesheet" href="/eduvize-styly/design-system/transport.css">
+  <link rel="stylesheet" href="/eduvize-styly/design-system/app-icons.css">
+  <link rel="stylesheet" href="/eduvize-styly/design-system/output-header.css">
+  <link rel="stylesheet" href="./published.css">
+  <script defer src="/eduvize-styly/design-system/output-client.js"></script>
+  <script defer src="/eduvize-styly/design-system/segment-profile.js"></script>
+  <script defer src="/eduvize-styly/design-system/nsp-geometry.js"></script>
+  <script defer src="/eduvize-styly/design-system/transport-layout.js"></script>
+  <script defer src="/eduvize-styly/design-system/app-icons.js"></script>
+  <script defer src="/eduvize-styly/design-system/output-runtime.js"></script>
+  <script defer src="./published.js"></script>
+</head>
+<body>
+  <main id="stage" class="page">
+    <section class="panel" aria-label="Odjezdy">
+      <header class="head edu-output-header">
+        <div class="identity edu-header-group">
+          <span class="edu-app-icon" data-edu-app-icon="transport" aria-hidden="true"></span>
+          <div><h1 class="edu-header-title">Odjezdy</h1><div class="subtitle edu-header-meta" id="selection"></div></div>
+        </div>
+        <div class="clock"><div class="clock-time edu-header-title" id="clock">--:--</div><div class="clock-date edu-header-meta" id="date"></div></div>
+      </header>
+      <div class="body">
+        <div class="departures-viewport" id="viewport">
+          <table>
+            <thead><tr class="table-header"><th>Odjezd</th><th>Linka</th><th class="destination-heading">Směr</th><th class="stop-heading">Zastávka</th><th>Za</th><th id="delay-heading">Zpoždění</th></tr></thead>
+            <tbody id="rows"><tr class="message"><td>Načítám publikovaný výstup…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <footer class="footer">
+        <span class="state"><span class="dot" id="dot"></span><span id="status" role="status">Načítám publikovaný výstup…</span></span>
+        <span class="footer-caption">Plánované časy ČR · Patrick Zandl · CC BY 4.0 / živé údaje PID · Golemio</span>
+        <nav aria-label="Stránkování"><button id="previous" type="button">Předchozí</button><span id="page"></span><button id="next" type="button">Další</button></nav>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
