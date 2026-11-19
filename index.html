@@ -31,7 +31,7 @@
 <main class="page"><section class="panel" aria-label="Odjezdy">
 <header class="head edu-output-header"><div class="identity edu-header-group"><span class="bus" data-edu-app-icon="transport"></span><div><h1 class="edu-header-title">Odjezdy</h1><div class="subtitle edu-header-meta" id="station">Načítání zastávek…</div></div></div><div class="clock"><div class="clock-time edu-header-title" id="clock">--:--</div><div class="clock-date edu-header-meta" id="date"></div></div></header>
 <div class="body"><div class="table-header"><span>Odjezd</span><span>Linka</span><span class="destination-heading">Směr</span><span class="stop-heading">Zastávka</span><span>Za</span><span>Zpoždění</span></div><div class="departures-viewport" id="viewport"><div id="departures" aria-live="off"><div class="message">Načítám jízdní řád…</div></div></div></div>
-<footer class="footer"><span class="state"><span id="dot" class="dot"></span><span id="status">Načítání dat z API</span></span><span class="footer-caption">Plánovaný čas · odpočet dle živých dat, jsou-li dostupná</span><span id="pagination" class="pagination"></span><span id="updated" class="updated"></span><span class="version">Odjezdy · v2026.11.01.4</span></footer>
+<footer class="footer"><span class="state"><span id="dot" class="dot"></span><span id="status">Načítání dat z API</span></span><span class="footer-caption">Plánovaný čas · odpočet dle živých dat, jsou-li dostupná</span><span id="pagination" class="pagination"></span><span id="updated" class="updated"></span></footer>
 </section></main>
 <script src="./transport-national.js?v=20261117-national-generation-r1"></script>
 <script src="./transport-realtime.js?v=71d22a46bba8006dd932"></script>
@@ -127,7 +127,7 @@ function applyTransportLayout(){const frame=window.frameElement,width=innerWidth
 applyTransportLayout();window.addEventListener('resize',applyTransportLayout);document.fonts?.ready.then(repaginate);
 updateClock();load();setInterval(()=>{updateClock();updateCountdowns()},10000);setInterval(load,30000);setInterval(()=>{if(!window.EduvizeOutputModes.isInteractive()&&!showAll&&pages.length>1){pageIndex=(pageIndex+1)%pages.length;render()}},pageSeconds*1000);new ResizeObserver(()=>repaginate()).observe($('viewport'));
 </script>
-<script src="/eduvize-styly/design-system/segment-display.js?v=71d22a46bba8006dd932"></script><div class="edu-kiosk-style-version" aria-label="Verze stylu kiosku">Odjezdy · styl kiosku v2026.11.01.50</div></body>
+<script src="/eduvize-styly/design-system/segment-display.js?v=71d22a46bba8006dd932"></script></body>
 </html>
 
 
