@@ -7,8 +7,12 @@ const {gzipSync}=require('node:zlib');
 const {Response}=globalThis;
 function reader(){
  let requests=0;
- const feed={schemaVersion:1,generated_at:'2026-10-23T00:00:00Z',stops:{Test:[[90600,0,'S1']]},trips:[['T1','calendar','123',3,'Terminal']],services:{calendar:{start:'20260101',end:'20261231',days:[1,1,1,1,1,0,0],exceptions:{'20261101':1,'20261102':2}}}};
- const context={Intl,Date,Map,Set,TextEncoder,crypto:webcrypto,Response,DecompressionStream,fetch:async()=>{requests++;return new Response(gzipSync(JSON.stringify(feed)))}};
+ const feed={schemaVersion:1,feed_version:1,generated_at:'2026-10-23T00:00:00Z',stops:{Test:[[90600,0,'S1']]},trips:[['T1','calendar','123',3,'Terminal']],services:{calendar:{start:'20260101',end:'20261231',days:[1,1,1,1,1,0,0],exceptions:{'20261101':1,'20261102':2}}}};
+ const manifest={schemaVersion:1,source:'cz_gtfs',generation_id:'a'.repeat(64),source_sha256:'b'.repeat(64),feed_version:feed.feed_version,generated_at:feed.generated_at};
+ const context={Intl,Date,Map,Set,TextEncoder,crypto:webcrypto,Response,DecompressionStream,fetch:async url=>{
+  if(String(url).includes('manifest.json'))return new Response(JSON.stringify(manifest));
+  requests++;return new Response(gzipSync(JSON.stringify(feed)));
+ }};
  vm.createContext(context);vm.runInContext(fs.readFileSync(__dirname+'/../transport-national.js','utf8'),context);
  return {api:context.EduvizeTransportNational,requests:()=>requests};
 }
