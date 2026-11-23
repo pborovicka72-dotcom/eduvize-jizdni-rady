@@ -1,1 +1,1 @@
-{"schemaVersion": 1, "source": "cz_gtfs", "feed_version": "data-2026-11-16", "generated_at": "2026-11-16T00:00:00Z", "stop_count": 38814, "stop_times": 5427345, "attribution": "Patrick Zandl · CC BY 4.0", "url": "https://github.com/tangero/jizdni-rady-czech-republic"}
+{"schemaVersion": 1, "source": "cz_gtfs", "feed_version": "data-2026-11-22", "generated_at": "2026-11-22T00:00:00Z", "stop_count": 38887, "stop_times": 5183033, "attribution": "Patrick Zandl · CC BY 4.0", "url": "https://github.com/tangero/jizdni-rady-czech-republic"}
