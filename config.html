@@ -138,7 +138,7 @@ const title=document.createElement('p');title.className='config-intro';
 title.textContent=origin==='address'?'Nejbližší zastávky u adresy: '+label+' (do '+radius.toLocaleString('cs')+' km)':origin==='stop'?'Další zastávky v okolí: '+label+' (do '+radius.toLocaleString('cs')+' km)':'Nejbližší zastávky u školy (do '+radius.toLocaleString('cs')+' km)';
 nearby.append(title);
 const rail=found.filter(x=>/^Praha-|^Nádraží /i.test(x.name));
-const others=found.filter(x=>!rail.includes(x)).slice(0,20);
+const others=found.filter(x=>!rail.includes(x));
 function section(label,items){if(!items.length)return;const heading=document.createElement('p');heading.className='config-intro';heading.textContent=label;nearby.append(heading);for(const item of items){const b=document.createElement('button');b.type='button';b.className='edu-choice';b.setAttribute('aria-pressed',String(selected.includes(item.name)));b.dataset.stop=item.name;b.dataset.distance=String(Math.round(item.km*1000));b.textContent=(selected.includes(item.name)?'✓ ':'+ ')+item.name+' · '+b.dataset.distance+' m';b.classList.toggle('chosen',selected.includes(item.name));b.onclick=()=>toggleStop(item.name);nearby.append(b)}}
 section('Železniční stanice a nádraží',rail);
 section('Ostatní zastávky',others);
