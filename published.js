@@ -42,29 +42,34 @@
   const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',paths[kind]||paths.bus);svg.append(path);return svg;
  }
  function rowNode(row,showDelay){
-  const tr=document.createElement('tr');tr.className='departure';if(row.is_canceled)tr.classList.add('is-canceled');
-  const departure=new Date(row.scheduled_at);const timeCell=document.createElement('td');timeCell.className='time';timeCell.textContent=time.format(departure);
-  const route=document.createElement('td');route.className='route';const [kind,color]=routeKind(row);if(color)route.classList.add(color);route.append(routeIcon(kind),text('route-number',row.line));
-  const destination=document.createElement('td');destination.className='destination';destination.textContent=tidy(row.destination);
-  const stopName=document.createElement('td');stopName.className='stop';stopName.textContent=tidy(row.stop_name);
-  const count=document.createElement('td');count.className='countdown';if(!row.is_canceled)count.dataset.departure=String(Date.parse(row.predicted_at||row.scheduled_at));
-  tr.append(timeCell,route,destination,stopName,count);
-  if(showDelay){const delay=document.createElement('td');delay.className='delay';delay.textContent=row.is_canceled?'Odřeknuto':plannedStops.has(row.stop_name)?'Plán':!row.realtime_available||!Number.isFinite(row.delay_seconds)?'Bez údaje':Math.abs(row.delay_seconds)<60?'Včas':(row.delay_seconds>0?'+':'−')+Math.floor(Math.abs(row.delay_seconds)/60)+' min';delay.classList.toggle('is-delayed',row.realtime_available&&row.delay_seconds>=60);tr.append(delay);}
-  return tr;
+  const item=document.createElement('div');item.className='departure';if(row.is_canceled)item.classList.add('is-canceled');
+  const route=text('route','');const [kind,color]=routeKind(row);if(color)route.classList.add(color);route.append(routeIcon(kind),text('route-number',row.line));
+  const count=text('countdown','—');if(!row.is_canceled)count.dataset.departure=String(Date.parse(row.predicted_at||row.scheduled_at));
+  item.append(text('time',time.format(new Date(row.scheduled_at))),route,text('destination',tidy(row.destination)),text('stop',tidy(row.stop_name)),count);
+  if(showDelay){const delay=text('delay',row.is_canceled?'Odřeknuto':plannedStops.has(row.stop_name)?'Plán':!row.realtime_available||!Number.isFinite(row.delay_seconds)?'Bez údaje':Math.abs(row.delay_seconds)<60?'Včas':(row.delay_seconds>0?'+':'−')+Math.floor(Math.abs(row.delay_seconds)/60)+' min');delay.classList.toggle('is-delayed',row.realtime_available&&row.delay_seconds>=60);item.append(delay);}
+  return item;
  }
- function pageSize(){
+ function pageSize(showDelay){
   if(snapshot.presentation.mode==='web')return Math.max(1,rows.length);
-  const available=$('viewport').clientHeight-$('viewport').querySelector('thead').offsetHeight;
-  const font=parseFloat(stage.style.getPropertyValue('--transport-text'))||metrics.text.body||24;
-  return Math.max(1,Math.floor(available/Math.max(48,font*1.65)));
+  const height=$('viewport').clientHeight;if(height<=0)return 1;
+  const root=$('rows');root.replaceChildren();
+  let used=0,count=0;
+  for(const row of rows){
+   const node=rowNode(row,showDelay);root.append(node);
+   const style=getComputedStyle(node),size=node.offsetHeight+parseFloat(style.marginBottom||0);
+   if(count&&used+size>height+0.5)break;
+   used+=size;count++;
+  }
+  return Math.max(1,count);
  }
  function renderRows(){
   if(!snapshot)return;
-  const count=pageSize(),pages=Math.max(1,Math.ceil(rows.length/count)),showDelay=rows.some(row=>row.realtime_available&&Number.isFinite(row.delay_seconds));
-  page=Math.min(page,pages-1);document.documentElement.dataset.delayAvailable=String(showDelay);
-  $('delay-heading').hidden=!showDelay;$('rows').replaceChildren();
+  const showDelay=rows.some(row=>row.realtime_available&&Number.isFinite(row.delay_seconds));
+  document.documentElement.dataset.delayAvailable=String(showDelay);
+  const count=pageSize(showDelay),pages=snapshot.payload.limit===0?1:Math.max(1,Math.ceil(rows.length/count));
+  page=Math.min(page,pages-1);$('rows').replaceChildren();
   for(const row of rows.slice(page*count,(page+1)*count))$('rows').append(rowNode(row,showDelay));
-  if(!rows.length){const message=document.createElement('tr');message.className='message';const cell=document.createElement('td');cell.colSpan=showDelay?6:5;cell.textContent='V nastaveném intervalu nejsou odjezdy.';message.append(cell);$('rows').append(message);}
+  if(!rows.length)$('rows').append(text('message','V nastaveném intervalu nejsou odjezdy.'));
   clock();
   const interactive=snapshot.presentation.interaction==='interactive';$('previous').parentElement.hidden=pages===1||!interactive;
   $('page').textContent=(page+1)+' / '+pages;$('previous').disabled=page===0;$('next').disabled=page===pages-1;
@@ -89,6 +94,6 @@
  root.EduvizeOutputRuntime.start({appId:'transport',outputId,
   onPresentation:(presentation,m)=>size(presentation,m),
   render:(value,m,{signal})=>{stop();stopped=false;snapshot=value;metrics=m;rows=[];page=0;$('selection').textContent=value.payload.stops.join(' · ');renderRows();signal.addEventListener('abort',stop,{once:true});},
-  onReady:()=>{resume();if(!paging&&snapshot.presentation.interaction==='display')paging=setInterval(()=>{const pages=Math.max(1,Math.ceil(rows.length/pageSize()));page=(page+1)%pages;renderRows()},snapshot.payload.pageSeconds*1000)},
+  onReady:()=>{resume();if(!paging&&snapshot.presentation.interaction==='display'&&snapshot.payload.limit!==0)paging=setInterval(()=>{const pages=Math.max(1,Math.ceil(rows.length/pageSize(rows.some(row=>row.realtime_available&&Number.isFinite(row.delay_seconds)))));page=(page+1)%pages;renderRows()},snapshot.payload.pageSeconds*1000)},
   onError:()=>{stop();$('status').textContent='Ověření publikace dočasně není dostupné.';$('dot').classList.add('error');},clear});
 })(window);
