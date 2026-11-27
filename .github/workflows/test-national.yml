@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: pborovicka72-dotcom/eduvize-styly
-          ref: bef4bd30ede3e219718fca0cce2ea7a6584f62ac
+          ref: 335737538927fda018b877830c3e102e85666444
           path: eduvize-styly
       - run: node tests/e2e/published-output.cjs
         env:
