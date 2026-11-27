@@ -45,7 +45,8 @@ if(showAll){document.body.classList.add('web-mode');}
 const names=(query.has('stops')?query.get('stops'):(query.get('name')||'')).split('|').map(x=>x.trim()).filter(Boolean);
 const stops=[...new Set(names)];
 const minutes=boundedNumber(query.get('minutes'),60,1,720);
-const limit=boundedNumber(query.get('limit'),25,1,200);
+const automaticLimit=query.get('limit')==='auto';
+const limit=automaticLimit?200:boundedNumber(query.get('limit'),25,1,200);
 const pageSeconds=boundedNumber(query.get('pageSeconds'),10,3,120);
 const source=query.get('source')||'pid';
 const selectedTypes=new Set((query.get('types')||'bus,tram,metro,train,ferry,funicular').split(','));
@@ -114,6 +115,7 @@ if(current.length&&used+size>height+0.5){pages.push(current);current=[];used=0}
 current.push(item.data);used+=size;
 }
 if(current.length)pages.push(current);if(!pages.length)pages=[[]];
+if(automaticLimit)pages=pages.slice(0,1);
 pageIndex=Math.min(pageIndex,pages.length-1);render();
 }
 async function load(){if(!stops.length){initialLoading=false;setStatus('Vyberte zastávku v administraci','');repaginate();return}if(refreshInProgress)return;refreshInProgress=true;try{const staticBase=query.get('staticData')||'./data/departures.json';const url=new URL(staticBase,location.href);let data;let liveFailure=false;
