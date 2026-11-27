@@ -30,6 +30,16 @@ class TransportOutput(unittest.TestCase):
   row=dict(stop_name='A',scheduled_at=at,predicted_at=None,realtime_available=False,delay_seconds=None,route_type=3,line='1',destination='Terminal',connectionId='secret')
   with patch('eduvize_transport.pid.fetch_board',return_value=([row],datetime.now(timezone.utc).isoformat())) as fetch:r=b.client.get('/api/public/v1/outputs/'+id+'/data?stops=Foreign&minutes=720')
   self.assertEqual(r.status_code,200,r.text);fetch.assert_called_once_with('A',60);self.assertNotIn('secret',r.text);self.assertIsNone(r.json()['data']['departures'][0]['delay_seconds'])
+ def test_auto_limit_keeps_candidates_for_segment_fitting(self):
+  self.b.body['draft']['payload']['limit']=0
+  self.assertEqual(validate(self.b.body['draft']['payload'],{})['limit'],0)
+  b=self.b;id=b.create()['id'];b.publish(id)
+  at=datetime.now(timezone.utc)+timedelta(minutes=5)
+  rows=[dict(stop_name='A',scheduled_at=(at+timedelta(minutes=i)).isoformat(),predicted_at=None,realtime_available=False,delay_seconds=None,route_type=3,line=str(i),destination='Terminal') for i in range(4)]
+  with patch('eduvize_transport.pid.fetch_board',return_value=(rows,datetime.now(timezone.utc).isoformat())):
+   response=b.client.get('/api/public/v1/outputs/'+id+'/data')
+  self.assertEqual(response.status_code,200,response.text)
+  self.assertEqual(len(response.json()['data']['departures']),4)
  def test_empty_board_is_not_fallback(self):
   b=self.b;id=b.create()['id'];b.publish(id)
   with patch('eduvize_transport.pid.fetch_board',return_value=([],datetime.now(timezone.utc).isoformat())):r=b.client.get('/api/public/v1/outputs/'+id+'/data')
