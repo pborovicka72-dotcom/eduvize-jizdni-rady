@@ -139,13 +139,21 @@ if(km<=radius&&Number.isFinite(km))found.push({name,km});
 }
 found.sort((a,b)=>a.km-b.km);
 if(!found.length){nearby.textContent='V okruhu '+radius.toLocaleString('cs')+' km nejsou nalezeny další zastávky vybraného zdroje.';return}
+const maxNearby=40,chosen=new Map();
+const regional=name=>/autobusov[ée]\s+nádraží|ÚAN|(?:^|[\s,])AN(?:$|[\s,])|autobusov[ýy]\s+terminál|terminál|·\s*CIS\s*\d+/i.test(name);
+const railway=name=>!regional(name)&&/nádraží|železniční\s+stanice|\bžst\.?/i.test(name);
+function take(items,count){for(const item of items){if(chosen.size>=maxNearby||count<=0)break;if(!chosen.has(item.name)){chosen.set(item.name,item);count--}}}
+take(found,24);take(found.filter(x=>railway(x.name)),8);take(found.filter(x=>regional(x.name)),8);take(found,maxNearby-chosen.size);
+const visible=[...chosen.values()].sort((a,b)=>a.km-b.km);
 const title=document.createElement('p');title.className='config-intro';
-title.textContent=origin==='address'?'Nejbližší zastávky u adresy: '+label+' (do '+radius.toLocaleString('cs')+' km)':origin==='stop'?'Další zastávky v okolí: '+label+' (do '+radius.toLocaleString('cs')+' km)':'Nejbližší zastávky u školy (do '+radius.toLocaleString('cs')+' km)';
+title.textContent=(origin==='address'?'Nejbližší zastávky u adresy: '+label:origin==='stop'?'Další zastávky v okolí: '+label:'Nejbližší zastávky u školy')+' (do '+radius.toLocaleString('cs')+' km; zobrazeno '+visible.length+' z '+found.length+')';
 nearby.append(title);
-const rail=found.filter(x=>/^Praha-|^Nádraží /i.test(x.name));
-const others=found.filter(x=>!rail.includes(x)).slice(0,20);
+const rail=visible.filter(x=>railway(x.name));
+const buses=visible.filter(x=>regional(x.name));
+const others=visible.filter(x=>!railway(x.name)&&!regional(x.name));
 function section(label,items){if(!items.length)return;const heading=document.createElement('p');heading.className='config-intro';heading.textContent=label;nearby.append(heading);for(const item of items){const b=document.createElement('button');b.type='button';b.className='edu-choice';b.setAttribute('aria-pressed',String(selected.includes(item.name)));b.dataset.stop=item.name;b.dataset.distance=String(Math.round(item.km*1000));b.textContent=(selected.includes(item.name)?'✓ ':'+ ')+item.name+' · '+b.dataset.distance+' m';b.classList.toggle('chosen',selected.includes(item.name));b.onclick=()=>toggleStop(item.name);nearby.append(b)}}
 section('Železniční stanice a nádraží',rail);
+section('Autobusová nádraží a regionální spoje',buses);
 section('Ostatní zastávky',others);
 }
 async function chooseSchool(item){const seq=++schoolChoiceSeq;schoolSeq++;addressSeq++;addressResults.replaceChildren();clearTimeout(schoolTimer);schoolResults.replaceChildren();nearby.replaceChildren();nearbyOrigin=null;schoolResults.textContent='Načítám polohu školy…';const ruian=String(item.ruian||'');if(!/^\d+$/.test(ruian)){schoolResults.textContent='U této školy chybí kód adresy RÚIAN.';return}try{let point;try{const url='https://ags.cuzk.gov.cz/arcgis/rest/services/RUIAN/MapServer/1/query?where='+encodeURIComponent('kod = '+ruian)+'&outFields=kod&returnGeometry=true&outSR=4326&f=json';const res=await fetch(url);if(!res.ok)throw Error('RÚIAN HTTP '+res.status);const result=await res.json();const geometry=result.features?.[0]?.geometry;if(!geometry)throw Error('Adresa nebyla nalezena');point={lat:geometry.y,lon:geometry.x}}catch(primary){const res=await fetch(weatherApi+'/api/v1/weather/ruian-address?code='+encodeURIComponent(ruian));if(!res.ok)throw primary;point=await res.json()}if(!Number.isFinite(Number(point.lat))||!Number.isFinite(Number(point.lon)))throw Error('Neplatné souřadnice');if(seq!==schoolChoiceSeq)return;showNearby(Number(point.lat),Number(point.lon),item.label+' – '+item.address);schoolResults.textContent='Vybraná škola: '+item.label+' · '+item.address}catch(e){if(seq!==schoolChoiceSeq)return;schoolResults.textContent='Polohu školy nelze načíst: '+e.message}}
