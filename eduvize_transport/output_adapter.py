@@ -29,8 +29,18 @@ def data_root():
     if not value:raise OutputError(503,'DEPENDENCY_UNAVAILABLE','Dopravní data nejsou nakonfigurována.')
     return Path(value)
 
-def catalog(root,national=False):
-    return json.loads((root/('national/stops.json' if national else 'stops.json')).read_text())
+def national_dataset(root):
+    directory = (root / 'national').resolve(strict=True)
+    manifest = json.loads((directory / 'manifest.json').read_text())
+    generation = manifest.get('generation_id')
+    if (root / 'generations').is_dir():
+        if not isinstance(generation, str) or not __import__('re').fullmatch('[a-f0-9]{64}', generation) or directory != (root / 'generations' / generation).resolve(strict=True):
+            raise ValueError('Unverified national generation')
+    return directory
+
+def catalog(root, national=False, dataset=None):
+    path = ((dataset if dataset is not None else national_dataset(root)) / 'stops.json') if national else root / 'stops.json'
+    return json.loads(path.read_text())
 
 def linked(name,a,b):
     def points(c):return c.get('coordinates',{}).get(name,[])
@@ -42,9 +52,9 @@ def linked(name,a,b):
     if any(not isinstance(p,list) or len(p)!=2 or any(type(v) not in (int,float) or not math.isfinite(v) for v in p) or abs(p[0])>90 or abs(p[1])>180 for p in x+y):return False
     return all(any(distance(p,q)<=150 for q in y) for p in x) and all(any(distance(p,q)<=150 for q in x) for p in y)
 
-def national_read(root,name,minutes,now):
+def national_read(root,name,minutes,now,dataset=None):
     key=hashlib.sha256(name.encode()).hexdigest()[:2]
-    with gzip.open(root/'national/shards'/f'{key}.json.gz','rt') as f:feed=json.load(f)
+    with gzip.open((dataset if dataset is not None else national_dataset(root)) / 'shards' / f'{key}.json.gz','rt') as f:feed=json.load(f)
     if feed.get('schemaVersion')!=1:raise ValueError('Unsupported feed')
     rows=feed['stops'].get(name)
     if rows is None:raise ValueError('Unknown stop')
@@ -69,7 +79,7 @@ def prepare(actor,payload,connection):
 def live(record,request):
     # Only the immutable published snapshot supplies selection; request query is ignored.
     config=json.loads(record['snapshot'])['payload'];root=data_root();now=datetime.now(timezone.utc)
-    try:a,b=catalog(root),catalog(root,True)
+    try:dataset=national_dataset(root);a,b=catalog(root),catalog(root,True,dataset=dataset)
     except (OSError,ValueError):raise OutputError(503,'DEPENDENCY_UNAVAILABLE','Katalog dopravy není dostupný.') from None
     rows=[];timestamps=[];missing=[];planned=[]
     from .pid import fetch_board
@@ -86,7 +96,7 @@ def live(record,request):
             except Exception:pass
         if name in b['stops'] and (config['source']=='cz_gtfs' or verified):
             try:
-                items,stamp=national_read(root,name,config['minutes'],now)
+                items,stamp=national_read(root,name,config['minutes'],now,dataset=dataset)
                 return name,items,stamp,True
             except (OSError,ValueError,KeyError,TypeError):pass
         return name,None,None,False

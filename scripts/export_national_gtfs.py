@@ -22,7 +22,59 @@ def rows(archive, name):
     return csv.DictReader(io.TextIOWrapper(stream, encoding='utf-8-sig'))
 
 
-def export(filename, output, version):
+def source_digest(filename):
+    """Hash logical CSV rows, never ZIP/GZip timestamps or release labels.
+
+    Row order is deliberately retained: the existing exporter uses source order
+    for equal-time departures and duplicate-reference resolution. Do not claim
+    reordered conflicting records are equivalent.
+    """
+    digest = hashlib.sha256()
+    with zipfile.ZipFile(filename) as archive:
+        for name in ['stops', 'routes', 'trips', 'calendar', 'calendar_dates', 'stop_times']:
+            table = hashlib.sha256()
+            for row in rows(archive, name):
+                if None in row:
+                    raise ValueError('GTFS CSV contains an unresolved column')
+                data = json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()
+                table.update(len(data).to_bytes(8, 'big'))
+                table.update(data)
+            digest.update(name.encode() + b'\0' + table.digest())
+    return digest.hexdigest()
+
+
+def payload_digest(output):
+    """Verify all 257 exported payloads, bounded one file at a time."""
+    output = Path(output)
+    digest = hashlib.sha256()
+    names = ['stops.json'] + ['shards/%02x.json.gz' % n for n in range(256)]
+    for name in names:
+        path = output / name
+        if not path.is_file() or path.is_symlink():
+            raise ValueError('National payload is incomplete or indirect')
+        file_digest = hashlib.sha256()
+        with path.open('rb') as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+                file_digest.update(chunk)
+        digest.update(name.encode() + b'\0' + file_digest.digest())
+    return digest.hexdigest()
+
+
+def unchanged_export(output, digest):
+    try:
+        manifest = json.loads((Path(output) / 'manifest.json').read_text(encoding='utf-8'))
+        return (manifest.get('schemaVersion') == 1 and manifest.get('source') == 'cz_gtfs'
+                and manifest.get('source_sha256') == digest
+                and manifest.get('payload_sha256') == payload_digest(output))
+    except (OSError, ValueError, TypeError):
+        return False
+
+
+def export(filename, output, version, *, compare_output=None):
+    source_sha256 = source_digest(filename)
+    if unchanged_export(compare_output if compare_output is not None else output, source_sha256):
+        print('National GTFS content unchanged; existing feed version and payloads retained')
+        return False
     output = Path(output)
     (output / 'shards').mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(filename) as archive, tempfile.TemporaryDirectory() as temp:
@@ -87,8 +139,9 @@ def export(filename, output, version):
             payload = {**base, 'stops': schedule, 'trips': compact_trips, 'services': used_services}
             (output / 'shards' / (key + '.json.gz')).write_bytes(gzip.compress(json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode(), mtime=0))
         (output / 'stops.json').write_text(json.dumps({'stops': sorted({s['stop_name'] for s in stops.values()}), 'coordinates': coordinates}, ensure_ascii=False), encoding='utf-8')
-        (output / 'manifest.json').write_text(json.dumps({**base, 'stop_count': len(stops), 'stop_times': count, 'attribution': 'Patrick Zandl · CC BY 4.0', 'url': 'https://github.com/' + REPOSITORY}, ensure_ascii=False), encoding='utf-8')
+        (output / 'manifest.json').write_text(json.dumps({**base, 'stop_count': len(stops), 'stop_times': count, 'attribution': 'Patrick Zandl · CC BY 4.0', 'url': 'https://github.com/' + REPOSITORY, 'source_sha256': source_sha256, 'payload_sha256': payload_digest(output)}, ensure_ascii=False), encoding='utf-8')
         print(f'Exported {len(stops)} stops, {count} stop times ({version})')
+        return True
 
 
 def main():
@@ -96,11 +149,12 @@ def main():
     parser.add_argument('--zip')
     parser.add_argument('--version')
     parser.add_argument('--output', default='data/national')
+    parser.add_argument('--compare-output', help='Verified current payload directory; output must be a separate staging directory for deployment')
     args = parser.parse_args()
     if args.zip:
         if not args.version:
             parser.error('--version is required with --zip')
-        export(args.zip, args.output, args.version)
+        export(args.zip, args.output, args.version, compare_output=args.compare_output)
     else:
         request = urllib.request.Request('https://api.github.com/repos/' + REPOSITORY + '/releases/latest', headers={'User-Agent': 'Eduvize-national-GTFS'})
         with urllib.request.urlopen(request, timeout=60) as response:
@@ -109,7 +163,7 @@ def main():
         with tempfile.TemporaryDirectory() as temp:
             filename = str(Path(temp) / 'gtfs.zip')
             urllib.request.urlretrieve(asset['browser_download_url'], filename)
-            export(filename, args.output, release['tag_name'])
+            export(filename, args.output, release['tag_name'], compare_output=args.compare_output)
 
 
 if __name__ == '__main__':
