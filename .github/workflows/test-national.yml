@@ -30,3 +30,12 @@ jobs:
       - run: npm install --no-save --package-lock=false playwright@1.58.2
       - run: npx playwright install --with-deps chromium
       - run: node tests/e2e/source-network.cjs
+
+      - uses: actions/checkout@v4
+        with:
+          repository: pborovicka72-dotcom/eduvize-styly
+          ref: d20659a6e938177908895ec59a9fb07b3a7dacb7
+          path: eduvize-styly
+      - run: node tests/e2e/published-output.cjs
+        env:
+          EDUVIZE_OUTPUT_STYLES: ${{ github.workspace }}/eduvize-styly

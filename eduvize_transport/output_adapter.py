@@ -20,7 +20,7 @@ def validate(payload,presentation):
     stops=payload['stops'];types=payload['types']
     if not isinstance(stops,list) or not 1<=len(stops)<=20 or any(not isinstance(s,str) or not s.strip() or s!=s.strip() or len(s)>100 or '|' in s for s in stops) or len(set(stops))!=len(stops):raise ValueError('Invalid stops')
     if not isinstance(types,list) or not types or any(not isinstance(t,str) or t not in TYPES for t in types) or len(set(types))!=len(types):raise ValueError('Invalid types')
-    for key,lo,hi in [('minutes',1,720),('limit',1,100),('pageSeconds',3,120)]:
+    for key,lo,hi in [('minutes',1,720),('limit',0,200),('pageSeconds',3,120)]:
         if type(payload[key]) is not int or not lo<=payload[key]<=hi:raise ValueError('Invalid numeric setting')
     return copy.deepcopy(payload)
 
@@ -106,7 +106,7 @@ def live(record,request):
     # Retain source provenance and never turn an unknown delay into zero.
     rows=[r for r in rows if r['stop_name'] in config['stops'] and kind(r) in config['types'] and now<=at(r)<=now+timedelta(minutes=config['minutes'])]
     rows.sort(key=at)
-    return dict(schemaVersion=1,observedAt=observed.isoformat(),fetchedAt=now.isoformat(),stale=any(now-datetime.fromisoformat(stamp.replace('Z','+00:00'))>(timedelta(days=10) if is_planned else timedelta(seconds=60)) for _,items,stamp,is_planned in results if items is not None),complete=not missing,data={'departures':rows[:config['limit']],'missingStops':missing,'plannedStops':planned})
+    return dict(schemaVersion=1,observedAt=observed.isoformat(),fetchedAt=now.isoformat(),stale=any(now-datetime.fromisoformat(stamp.replace('Z','+00:00'))>(timedelta(days=10) if is_planned else timedelta(seconds=60)) for _,items,stamp,is_planned in results if items is not None),complete=not missing,data={'departures':rows[:config['limit'] or 200],'missingStops':missing,'plannedStops':planned})
 
 def live_validate(value):
     # Public rows are allowlisted; no provider/private connection metadata can leak.
